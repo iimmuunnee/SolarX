@@ -10,7 +10,7 @@
 * **참여 인원:** 개인 프로젝트 (1인)
 * **담당 역할:**
     * **Data Engineering:** 공공데이터 수집, 전처리(Wh/kW 단위 보정), 시계열 데이터 파이프라인 구축
-    * **AI Modeling:** PyTorch 기반 LSTM 발전량 예측 모델 설계 및 학습 (Loss: 0.0019 달성)
+    * **AI Modeling:** PyTorch 기반 LSTM 발전량 예측 모델 설계 및 학습
     * **Simulation:** 글로벌 배터리 3사(LG/Samsung/Tesla) 스펙 모델링 및 경제성 분석 시뮬레이터 개발
 
 ## 1. 📝 프로젝트 개요 (Overview)
