@@ -1,4 +1,4 @@
-# 🤖 SolarX: Multi-Vendor Battery Optimization for Humanoid Stations
+# SolarX: Multi-Vendor Battery Optimization for Humanoid Stations
 > **"LG에너지솔루션, 삼성SDI, Tesla의 배터리 기술을 비교 분석하여, 로봇 충전 스테이션의 최적 경제성을 도출하다"**
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
@@ -97,11 +97,11 @@ LSTM 모델을 통해 기상 데이터(일사량, 기온, 습도 등)를 기반�
 *(각기 다른 기후 환경(제주, 시애틀)에서도 적자 없이 안정적으로 우상향하는 수익 곡선을 확인)*
 동해 발전소 데이터를 기반으로 **두 가지 극한 환경(Extreme Conditions)** 을 생성하여 검증한 결과입니다.
 
-| 시나리오 (Location) | 총 발전량 (Total Gen) | 최종 수익 (Profit) | 분석 (Insight) |
+| 시나리오 (Location) | 총 발전량 (Total Gen) | 최종 수익 (KRW) | 분석 (Insight) |
 | :--- | :--- | :--- | :--- |
-| **동해 Donghae (Base)** | **446.37 MW** | **54,064,596 KRW** | 기준 모델 (Baseline) |
-| **제주 Jeju (High Solar)** | **533.57 MW** | **64,630,037 KRW** | 발전량 급증 시에도 **Bypass 알고리즘**이 개입하여 잉여 전력 손실 없이 수익을 19.5% 추가 창출함. |
-| **시애틀 Seattle (Low Solar)** | **267.82 MW** | **32,438,748 KRW** | 흐린 날씨로 발전량이 40% 감소했으나, **Deep Discharge 제어**를 통해 최소한의 배터리 가동률을 유지하며 수익성 방어 성공. |
+| **동해 Donghae (Base)** | **446.37 MW** | **54,064,596원** | 기준 모델 (Baseline) |
+| **제주 Jeju (High Solar)** | **533.57 MW** | **64,630,037원** | 발전량 급증 시에도 **Bypass 알고리즘**이 개입하여 잉여 전력 손실 없이 수익을 19.5% 추가 창출함. |
+| **시애틀 Seattle (Low Solar)** | **267.82 MW** | **32,438,748원** | 흐린 날씨로 발전량이 40% 감소했으나, **Deep Discharge 제어**를 통해 최소한의 배터리 가동률을 유지하며 수익성 방어 성공. |
 
 > **💡 결론:**
 > SolarX 시스템은 발전량의 절대적인 크기와 상관없이, **어떤 환경에서도 '선형적인 수익성(Linear Profitability)'을 유지하는 로직의 강건성(Robustness)**을 입증했습니다. 이는 향후 글로벌 로봇 스테이션 확장 시 별도의 재학습 없이도 즉시 배포(Zero-shot Deployment)가 가능할 수도 있음을 시사합니다.
