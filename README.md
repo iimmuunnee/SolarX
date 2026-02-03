@@ -6,11 +6,11 @@
 ![Strategy](https://img.shields.io/badge/Strategy-Multi%20Vendor%20Analysis-blueviolet)
 
 ## 📅 프로젝트 정보 (Project Info)
-* **진행 기간:** 2025.12 ~ 2026.02 (약 3개월)
+* **진행 기간:** 2025.12 ~ 2026.02
 * **참여 인원:** 개인 프로젝트 (1인)
 * **담당 역할:**
     * **Data Engineering:** 공공데이터 수집, 전처리(Wh/kW 단위 보정), 실제 전력시장 가격(SMP) 파이프라인 구축
-    * **AI Modeling:** PyTorch 기반 LSTM 발전량 예측 모델 설계 및 학습 (Loss: 0.0021 달성)
+    * **AI Modeling:** PyTorch 기반 LSTM 발전량 예측 모델 설계 및 학습
     * **Simulation:** 글로벌 배터리 3사(LG/Samsung/Tesla) 스펙 모델링 및 경제성 분석 시뮬레이터 개발
 
 ## 1. 📝 프로젝트 개요 (Overview)
@@ -51,7 +51,7 @@ LSTM 모델을 통해 기상 데이터(일사량, 기온, 습도 등)를 기반�
 *(실제 발전량 패턴(True)을 AI 모델(Prediction)이 정밀하게 추종하고 있음을 확인)*
 
 ### 4-2. 💰 제조사별 수익성 비교 (Net Profit Analysis)
-**실제 전력거래소(KPX)의 2024-2025년 SMP 데이터**를 적용하여 수행한 Real-World 시뮬레이션 결과입니다.
+**실제 전력거래소(KPX)의 2024~2025년 SMP 데이터**를 적용하여 수행한 Real-World 시뮬레이션 결과입니다.
 ![Benchmark Graph](./images/benchmark_graph.png)
 *(하단 그래프: 기준 모델(0) 대비 순수 추가 수익(Net Gain)을 시각화)*
 
@@ -64,7 +64,7 @@ LSTM 모델을 통해 기상 데이터(일사량, 기온, 습도 등)를 기반�
 
 > **💡 결론:**
 > 가격 변동폭이 제한적인 **현실 전력 시장(Real-World SMP)** 환경에서는 대박을 노리는 전략보다 **작은 손실(Loss)도 허용하지 않는 '고효율(High Efficiency)' 전략이 유효함**을 데이터로 증명했습니다.
-> 가상 시뮬레이션 대비 수익률은 줄었으나(+26% → +2.37%), 이는 실제 비즈니스 환경에서의 **Realism을 확보**했다는 점에서 더 큰 의미를 가집니다.
+> 가상 시뮬레이션 대비 수익률은 줄었으나(+26% → +2.37%), 이는 실제 비즈니스 환경에서의 **현실성을 확보**했다는 점에서 더 큰 의미를 가집니다.
 
 ## 5. 📜 프로젝트 변천사 (Project Evolution)
 단순한 예측 모델에서 시작하여, 시장의 흐름(Market Trend)과 기술적 깊이(Depth)를 더해가며 발전시켰습니다.
