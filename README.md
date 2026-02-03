@@ -6,7 +6,7 @@
 ![Strategy](https://img.shields.io/badge/Strategy-Multi%20Vendor%20Analysis-blueviolet)
 
 ## 📅 프로젝트 정보 (Project Info)
-* **진행 기간:** 2025.12 ~ 2026.02 (약 3개월)
+* **진행 기간:** 2026.01 ~ 2026.02
 * **참여 인원:** 개인 프로젝트 (1인)
 * **담당 역할:**
     * **Data Engineering:** 공공데이터 수집, 전처리(Wh/kW 단위 보정), 시계열 데이터 파이프라인 구축
