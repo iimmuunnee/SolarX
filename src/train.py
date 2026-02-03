@@ -13,13 +13,14 @@ from src.model import SolarLSTM
 
 def train():
     print("="*50)
-    print("🚀 SolarX 학습 (정석 모드: No Data Leakage)")
+    print("🚀 SolarX 학습")
     print("="*50)
     
     # 1. 정석 데이터 준비
     loader = SolarDataManager()
-    # Train과 Test를 여기서 칼같이 나눕니다.
-    train_x, train_y, test_x, test_y = loader.load_and_split_standard('./data')
+    
+    # 반환값이 5개이므로, 마지막 'test_smp'는 _ 로 받아서 무시
+    train_x, train_y, test_x, test_y, _ = loader.load_and_split_standard('./data')
     
     # 시퀀스 생성 (Train만 사용!)
     X_train, y_train = loader.create_sequences(train_x, train_y, seq_length=24)
