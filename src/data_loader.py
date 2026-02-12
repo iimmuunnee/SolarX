@@ -1,7 +1,34 @@
-﻿import pandas as pd
+﻿"""Data loading and preprocessing for solar generation prediction."""
+import pandas as pd
 import numpy as np
 import os
+from typing import Tuple, List, Optional
 from sklearn.preprocessing import MinMaxScaler
+import logging
+
+logger = logging.getLogger("solarx.data_loader")
+
+
+def validate_required_columns(df: pd.DataFrame, required_cols: List[str], data_type: str) -> None:
+    """
+    Validate that all required columns exist in DataFrame.
+
+    Args:
+        df: DataFrame to validate
+        required_cols: List of required column names
+        data_type: Description of data type (for error messages)
+
+    Raises:
+        ValueError: If any required columns are missing
+    """
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        available = list(df.columns)
+        raise ValueError(
+            f"{data_type} 데이터에 필수 컬럼이 누락되었습니다.\n"
+            f"누락된 컬럼: {missing_cols}\n"
+            f"사용 가능한 컬럼: {available}"
+        )
 
 
 class SolarDataManager:
@@ -9,8 +36,12 @@ class SolarDataManager:
         self.scaler_x = MinMaxScaler()
         self.scaler_y = MinMaxScaler()
 
-    def load_and_split_standard(self, data_dir="./data", split_ratio=0.8):
-        print(f">>> [FM Mode] '{data_dir}' 데이터 통합 로드 중...")
+    def load_and_split_standard(
+        self,
+        data_dir: str = "./data",
+        split_ratio: float = 0.8
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, Optional[np.ndarray]]:
+        logger.info(f">>> [FM Mode] '{data_dir}' 데이터 통합 로드 중...")
 
         weather_list = []
         solar_df = None
@@ -47,10 +78,10 @@ class SolarDataManager:
                 is_smp = True
 
             if is_smp:
-                print(f"   [SMP detected]: {filename}")
+                logger.info(f"   [SMP detected]: {filename}")
 
                 if "1h" not in df.columns:
-                    print("      헤더 재시도 (header=1)")
+                    logger.info("      헤더 재시도 (header=1)")
                     df = self._read_file_smart(filepath, filename_lower, header=1)
                     df.columns = df.columns.str.strip()
 
@@ -87,7 +118,7 @@ class SolarDataManager:
             smp_df = smp_df.dropna(subset=["날짜"])
             smp_melted = self._melt_smp(smp_df)
         else:
-            print("Warning: SMP 파일이 없어 임시 가격을 사용합니다.")
+            logger.warning("Warning: SMP 파일이 없어 임시 가격을 사용합니다.")
             smp_melted = None
 
         req_cols = [
@@ -100,9 +131,10 @@ class SolarDataManager:
             "일사(MJ/m2)",
             "운량(10분위)",
         ]
-        for col in req_cols:
-            if col not in weather_df.columns:
-                weather_df[col] = 0
+
+        # Validate required columns instead of silent imputation
+        validate_required_columns(weather_df, req_cols, "기상")
+
         weather_selected = weather_df[req_cols].fillna(0)
 
         final_data = pd.merge(
@@ -113,7 +145,7 @@ class SolarDataManager:
             final_data = pd.merge(
                 final_data, smp_melted[["Datetime", "SMP"]], on="Datetime", how="inner"
             )
-            print(f"Merge complete (총 {len(final_data)}시간, SMP 적용)")
+            logger.info(f"Merge complete (총 {len(final_data)}시간, SMP 적용)")
         else:
             final_data["SMP"] = 0
 
@@ -149,7 +181,7 @@ class SolarDataManager:
 
         return train_x_scaled, train_y_scaled, test_x_scaled, test_y_scaled, test_smp
 
-    def _read_file_smart(self, filepath, filename_lower, header=0):
+    def _read_file_smart(self, filepath: str, filename_lower: str, header: int = 0) -> Optional[pd.DataFrame]:
         try:
             if filename_lower.endswith(".csv"):
                 try:
@@ -161,10 +193,10 @@ class SolarDataManager:
                         return pd.read_csv(filepath, encoding="utf-8-sig", header=header)
             return pd.read_excel(filepath, header=header)
         except Exception as e:
-            print(f"File read failed ({filepath}): {e}")
+            logger.error(f"File read failed ({filepath}): {e}")
             return None
 
-    def _normalize_weather_columns(self, df):
+    def _normalize_weather_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         col_map = {}
         for col in df.columns:
             if "기온" in col:
@@ -183,7 +215,7 @@ class SolarDataManager:
                 col_map[col] = "운량(10분위)"
         return df.rename(columns=col_map)
 
-    def _melt_data(self, df, value_name="Value"):
+    def _melt_data(self, df: pd.DataFrame, value_name: str = "Value") -> pd.DataFrame:
         date_col = "날짜" if "날짜" in df.columns else df.columns[0]
         df[date_col] = pd.to_datetime(df[date_col])
         hour_cols = [c for c in df.columns if "시" in c and c != date_col]
@@ -194,7 +226,7 @@ class SolarDataManager:
         melted["Datetime"] = melted[date_col] + pd.to_timedelta(melted["Hour"], unit="h")
         return melted
 
-    def _melt_smp(self, df):
+    def _melt_smp(self, df: pd.DataFrame) -> pd.DataFrame:
         date_col = "날짜" if "날짜" in df.columns else df.columns[0]
         hour_cols = [f"{i}h" for i in range(1, 25)]
         available_cols = [c for c in hour_cols if c in df.columns]
@@ -205,7 +237,12 @@ class SolarDataManager:
         melted["Datetime"] = melted[date_col] + pd.to_timedelta(melted["Hour"], unit="h")
         return melted
 
-    def create_sequences(self, data_x, data_y, seq_length=24):
+    def create_sequences(
+        self,
+        data_x: np.ndarray,
+        data_y: np.ndarray,
+        seq_length: int = 24
+    ) -> Tuple[np.ndarray, np.ndarray]:
         xs, ys = [], []
         for i in range(len(data_x) - seq_length):
             x = data_x[i : i + seq_length]
@@ -214,5 +251,5 @@ class SolarDataManager:
             ys.append(y)
         return np.array(xs), np.array(ys)
 
-    def inverse_transform_y(self, y_scaled):
+    def inverse_transform_y(self, y_scaled: np.ndarray) -> np.ndarray:
         return self.scaler_y.inverse_transform(y_scaled)
