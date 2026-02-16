@@ -9,9 +9,9 @@ from functools import lru_cache
 import hashlib
 import json
 
-# Add SolarX to path
-SOLARX_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..", "SolarX"))
-sys.path.insert(0, SOLARX_DIR)
+# Add root directory to path (where src/, data/, config.py are located)
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+sys.path.insert(0, ROOT_DIR)
 
 from src.battery import SamsungSDI, LGEnergySolution, TeslaBattery, ESSBattery
 from src.data_loader import SolarDataManager
@@ -59,7 +59,7 @@ class SimulationService:
 
         # Load data
         self.loader = SolarDataManager()
-        data_dir = os.path.join(SOLARX_DIR, "data")
+        data_dir = os.path.join(ROOT_DIR, "data")
         _, _, self.test_x, self.test_y, self.test_smp = self.loader.load_and_split_standard(data_dir)
 
         # Create sequences
@@ -74,7 +74,7 @@ class SimulationService:
         )
 
         # Load LSTM model
-        model_path = os.path.join(SOLARX_DIR, "src", "lstm_solar_model.pth")
+        model_path = os.path.join(ROOT_DIR, "src", "lstm_solar_model.pth")
         self.predictor = LSTMPredictor(
             model_path,
             input_size=self.config.model.input_size,

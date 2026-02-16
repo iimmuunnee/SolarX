@@ -28,7 +28,10 @@ COPY backend/requirements.txt ./backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
 # Copy SolarX Python modules (battery, model, data, etc.)
-COPY SolarX/ ./SolarX/
+COPY src/ ./src/
+COPY data/ ./data/
+COPY tests/ ./tests/
+COPY main.py config.py requirements.txt ./
 
 # Copy backend application
 COPY backend/ ./backend/
