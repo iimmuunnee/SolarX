@@ -9,7 +9,13 @@
       "Bash(ls:*)",
       "Bash(timeout 10 uvicorn:*)",
       "Bash(timeout 5 uvicorn:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(test:*)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git restore:*)",
+      "Bash(git push:*)"
     ]
   }
 }
