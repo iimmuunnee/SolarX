@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "home": "Home",
+    "story": "Story",
+    "demo": "Demo",
+    "architecture": "Architecture",
+    "results": "Results"
+  },
+  "buttons": {
+    "tryDemo": "Try Demo",
+    "viewResults": "View Results",
+    "runSimulation": "Run Simulation"
+  },
+  "loading": "Loading...",
+  "loadingSimulation": "Running Simulation...",
+  "error": "An error occurred",
+  "noData": "No data available",
+  "vendor": {
+    "lg": "LG Energy Solution",
+    "samsung": "Samsung SDI",
+    "tesla": "Tesla",
+    "baseline": "Baseline (No ESS)"
+  }
+}

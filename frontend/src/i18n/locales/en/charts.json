@@ -1,0 +1,69 @@
+{
+  "profitChart": {
+    "title": "Cumulative Profit Over Time",
+    "xAxis": "Hours",
+    "yAxis": "Profit (KRW)",
+    "tooltip": {
+      "hour": "Hour {{hour}}"
+    }
+  },
+  "predictionChart": {
+    "title": "LSTM Prediction vs Actual Solar Generation",
+    "xAxis": "Hours",
+    "yAxis": "Power (kW)",
+    "legend": {
+      "actual": "Actual Solar",
+      "predicted": "LSTM Prediction"
+    },
+    "tooltip": {
+      "hour": "Hour {{hour}}"
+    }
+  },
+  "metrics": {
+    "mae": {
+      "label": "MAE (Mean Absolute Error)",
+      "help": "Prediction accuracy"
+    },
+    "rmse": {
+      "label": "RMSE (Root Mean Squared Error)",
+      "help": "Prediction accuracy"
+    },
+    "mape": {
+      "label": "MAPE (Mean Absolute Percentage Error)",
+      "help": "Prediction accuracy"
+    },
+    "revenue": {
+      "label": "Total Revenue",
+      "help": "{{vendor}}"
+    },
+    "soh": {
+      "label": "State of Health (SOH)",
+      "help": "{{cycles}} cycles"
+    },
+    "throughput": {
+      "label": "Energy Throughput",
+      "help": "Total energy processed"
+    },
+    "roi": {
+      "label": "Return on Investment (ROI)",
+      "help": "Payback: {{years}} years"
+    },
+    "capex": {
+      "label": "CAPEX (Capital Expenditure)",
+      "help": "Initial investment"
+    },
+    "npv": {
+      "label": "Net Present Value (NPV)",
+      "help": "5% discount rate"
+    },
+    "duration": {
+      "label": "Simulation Duration",
+      "hours": "hours",
+      "years": "{{years}} years"
+    },
+    "avgPrice": {
+      "label": "Average SMP Price",
+      "help": "Korean power exchange"
+    }
+  }
+}

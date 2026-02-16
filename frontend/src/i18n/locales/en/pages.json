@@ -1,0 +1,143 @@
+{
+  "landing": {
+    "hero": {
+      "title": "SolarX: AI-Powered Battery Optimization",
+      "subtitle": "Compare LG, Samsung, and Tesla batteries for solar-powered humanoid robot charging stations using LSTM prediction and physics-informed models.",
+      "metrics": {
+        "vendors": "Vendors Compared",
+        "soh": "Battery SOH",
+        "roi": "ROI"
+      }
+    },
+    "cards": {
+      "story": {
+        "title": "📖 Story",
+        "description": "Project evolution from v1.0 to v5.0"
+      },
+      "demo": {
+        "title": "🎮 Demo",
+        "description": "Interactive simulation with custom parameters"
+      },
+      "architecture": {
+        "title": "🏗️ Architecture",
+        "description": "Technical deep-dive into the system"
+      },
+      "results": {
+        "title": "📊 Results",
+        "description": "Benchmark performance showcase"
+      }
+    }
+  },
+  "demo": {
+    "title": "Interactive Battery Simulation",
+    "subtitle": "Adjust parameters below to run a custom simulation comparing all battery vendors.",
+    "parameters": {
+      "title": "Simulation Parameters",
+      "batteryCapacity": "Battery Capacity",
+      "batteryCapacityRange": "Range: 500-5000 kWh",
+      "chargeThreshold": "Charge Threshold",
+      "chargeThresholdHelp": "Charge when price < avg × {{threshold}}",
+      "dischargeThreshold": "Discharge Threshold",
+      "dischargeThresholdHelp": "Discharge when price > avg × {{threshold}}",
+      "regionFactor": "Region Solar Factor",
+      "regionSeattle": "Seattle (Low Solar) - 0.6×",
+      "regionDonghae": "Donghae (Base) - 1.0×",
+      "regionJeju": "Jeju (High Solar) - 1.3×",
+      "allowGridCharge": "Allow Grid Charging"
+    },
+    "results": {
+      "predictionQuality": "Prediction Quality",
+      "vendorResults": "Vendor Results",
+      "emptyState": "Adjust parameters and click \"Run Simulation\" to see results"
+    },
+    "loadingMessage": "Running simulation... This may take a few seconds."
+  },
+  "results": {
+    "loading": "Loading pre-computed benchmark results...",
+    "winner": {
+      "badge": "🏆 WINNER",
+      "totalRevenue": "Total Revenue",
+      "stateOfHealth": "State of Health",
+      "roi": "ROI"
+    },
+    "predictionQuality": "LSTM Prediction Quality",
+    "vendorComparison": "Detailed Vendor Comparison",
+    "table": {
+      "vendor": "Vendor",
+      "revenue": "Revenue",
+      "soh": "SOH",
+      "cycles": "Cycles",
+      "roi": "ROI",
+      "payback": "Payback",
+      "npv": "NPV",
+      "best": "Best",
+      "baseline": "Baseline (No ESS)",
+      "years": "years"
+    }
+  },
+  "story": {
+    "problemTitle": "The Problem",
+    "problemText1": "Humanoid robots require efficient, cost-effective charging infrastructure. Traditional grid-only solutions face high electricity costs during peak hours. Solar + ESS (Energy Storage System) combinations promise savings, but <strong>which battery vendor offers the best ROI?</strong>",
+    "problemText2": "This project compares three global battery manufacturers—LG Energy Solution, Samsung SDI, and Tesla—using real-world data from Korean solar farms and power exchange (SMP) pricing.",
+    "solutionTitle": "The Solution",
+    "solutionIntro": "SolarX combines three critical components:",
+    "solutionItem1Title": "LSTM Neural Network",
+    "solutionItem1Desc": "Predicts solar generation 24 hours ahead using weather data (temperature, humidity, solar radiation, cloud cover)",
+    "solutionItem2Title": "Physics-Informed Battery Models",
+    "solutionItem2Desc": "Simulates real battery behavior including C-rate limits, temperature effects, efficiency losses, and degradation (SOH tracking)",
+    "solutionItem3Title": "Economic Analysis",
+    "solutionItem3Desc": "Calculates CAPEX, OPEX, ROI, payback period, and NPV using real Korean SMP (System Marginal Price) data",
+    "evolutionTitle": "Evolution Timeline",
+    "v1Title": "v1.0 - Baseline Simulation (Week 1)",
+    "v1Achievement": "Achievement",
+    "v1AchievementText": "Basic battery charge/discharge simulation with dummy data",
+    "v1Learning": "Learning",
+    "v1LearningText": "Simplified assumptions missed real-world complexity",
+    "v1Metrics": "Metrics",
+    "v1MetricsText": "No prediction, manual price thresholds, constant efficiency",
+    "v2Title": "v2.0 - LSTM Integration (Week 2)",
+    "v2Achievement": "Achievement",
+    "v2AchievementText": "Trained LSTM on real solar farm data from Donghae, Korea",
+    "v2Learning": "Learning",
+    "v2LearningText": "Prediction accuracy (MAPE) improved decision-making quality",
+    "v2Metrics": "Metrics",
+    "v2MetricsText": "MAE: 53.78 kW, RMSE: 92.56 kW, MAPE: 60.08%",
+    "v3Title": "v3.0 - Physics-Informed Models (Week 3)",
+    "v3Achievement": "Achievement",
+    "v3AchievementText": "Added C-rate limits, SOC constraints, temperature-dependent efficiency",
+    "v3Learning": "Learning",
+    "v3LearningText": "Battery degradation (SOH) is critical for long-term economics",
+    "v3Metrics": "Metrics",
+    "v3MetricsText": "SOH tracking implemented, cycle counting added",
+    "v4Title": "v4.0 - Economic Analysis (Week 4)",
+    "v4Achievement": "Achievement",
+    "v4AchievementText": "Full CAPEX/OPEX modeling with vendor-specific costs",
+    "v4Learning": "Learning",
+    "v4LearningText": "Samsung SDI won despite lower efficiency due to better degradation rate",
+    "v4Metrics": "Metrics",
+    "v4MetricsText": "ROI: 12,765%, Payback: 0.0 years (data-limited), NPV calculated",
+    "v5Title": "v5.0 - Web Application (Current)",
+    "v5Achievement": "Achievement",
+    "v5AchievementText": "React + FastAPI web interface with interactive demos",
+    "v5Learning": "Learning",
+    "v5LearningText": "Portfolio presentation requires both technical depth and UX polish",
+    "v5Metrics": "Metrics",
+    "v5MetricsText": "100% test coverage, Docker deployment, <5s simulation runtime",
+    "keyInsights": "Key Insights",
+    "insight1Title": "Efficiency ≠ Winner",
+    "insight1Text": "Samsung won despite 98.5% efficiency (vs Tesla's 97%) because of superior degradation resistance (0.00009 vs 0.0001 per cycle)",
+    "insight2Title": "C-Rate Matters",
+    "insight2Text": "LG's 2.0C allows faster charging but causes more stress. Samsung's balanced 1.8C proved optimal for longevity.",
+    "insight3Title": "Prediction Quality",
+    "insight3Text": "10× improvement over random baseline (MAE: 53.78 kW vs ~500 kW random guessing)"
+  },
+  "architecture": {
+    "title": "System Architecture",
+    "subtitle": "Technical overview of the SolarX battery optimization system",
+    "dataFlowTitle": "Data Flow",
+    "dataFlowText": "The system follows a sequential pipeline from data ingestion to economic analysis:",
+    "componentsTitle": "Core Components",
+    "apiTitle": "API Endpoints",
+    "deploymentTitle": "Deployment Architecture"
+  }
+}

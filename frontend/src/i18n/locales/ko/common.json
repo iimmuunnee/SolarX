@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "home": "홈",
+    "story": "스토리",
+    "demo": "데모",
+    "architecture": "아키텍처",
+    "results": "결과"
+  },
+  "buttons": {
+    "tryDemo": "데모 시작",
+    "viewResults": "결과 보기",
+    "runSimulation": "시뮬레이션 실행"
+  },
+  "loading": "로딩 중...",
+  "loadingSimulation": "시뮬레이션 실행 중...",
+  "error": "오류가 발생했습니다",
+  "noData": "데이터가 없습니다",
+  "vendor": {
+    "lg": "LG 에너지솔루션",
+    "samsung": "삼성 SDI",
+    "tesla": "테슬라",
+    "baseline": "기준선 (ESS 없음)"
+  }
+}

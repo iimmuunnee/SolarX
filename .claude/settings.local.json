@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pytest:*)",
+      "Bash(python main.py:*)",
+      "Bash(python:*)",
+      "Bash(dir:*)",
+      "Bash(tee:*)",
+      "Bash(ls:*)",
+      "Bash(timeout 10 uvicorn:*)",
+      "Bash(timeout 5 uvicorn:*)",
+      "Bash(npm run build:*)"
+    ]
+  }
+}

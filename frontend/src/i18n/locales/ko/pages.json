@@ -1,0 +1,131 @@
+{
+  "landing": {
+    "hero": {
+      "title": "SolarX: AI 기반 배터리 최적화",
+      "subtitle": "태양광 기반 휴머노이드 로봇 충전 스테이션을 위한 LG, 삼성, 테슬라 배터리 비교 - LSTM 예측 및 물리 기반 모델 활용",
+      "metrics": {
+        "vendors": "비교 벤더",
+        "soh": "배터리 건강도",
+        "roi": "투자 수익률"
+      }
+    },
+    "cards": {
+      "story": {
+        "title": "📖 스토리",
+        "description": "v1.0에서 v5.0까지 프로젝트 진화 과정"
+      },
+      "demo": {
+        "title": "🎮 데모",
+        "description": "맞춤 매개변수로 대화형 시뮬레이션"
+      },
+      "architecture": {
+        "title": "🏗️ 아키텍처",
+        "description": "시스템에 대한 기술적 심층 분석"
+      },
+      "results": {
+        "title": "📊 결과",
+        "description": "벤치마크 성능 쇼케이스"
+      }
+    }
+  },
+  "demo": {
+    "title": "대화형 배터리 시뮬레이션",
+    "subtitle": "모든 배터리 벤더를 비교하는 맞춤 시뮬레이션을 실행하려면 아래 매개변수를 조정하세요.",
+    "parameters": {
+      "title": "시뮬레이션 매개변수",
+      "batteryCapacity": "배터리 용량",
+      "batteryCapacityRange": "범위: 500-5000 kWh",
+      "chargeThreshold": "충전 임계값",
+      "chargeThresholdHelp": "가격이 평균 × {{threshold}} 미만일 때 충전",
+      "dischargeThreshold": "방전 임계값",
+      "dischargeThresholdHelp": "가격이 평균 × {{threshold}} 초과일 때 방전",
+      "regionFactor": "지역 태양광 계수",
+      "regionSeattle": "시애틀 (낮은 태양광) - 0.6×",
+      "regionDonghae": "동해 (기준) - 1.0×",
+      "regionJeju": "제주 (높은 태양광) - 1.3×",
+      "allowGridCharge": "그리드 충전 허용"
+    },
+    "results": {
+      "predictionQuality": "예측 품질",
+      "vendorResults": "벤더 결과",
+      "emptyState": "매개변수를 조정하고 \"시뮬레이션 실행\"을 클릭하여 결과를 확인하세요"
+    },
+    "loadingMessage": "시뮬레이션 실행 중... 몇 초 정도 걸릴 수 있습니다."
+  },
+  "results": {
+    "loading": "사전 계산된 벤치마크 결과를 로드하는 중...",
+    "winner": {
+      "badge": "🏆 우승자",
+      "totalRevenue": "총 수익",
+      "stateOfHealth": "배터리 건강도",
+      "roi": "투자 수익률"
+    },
+    "predictionQuality": "LSTM 예측 품질",
+    "vendorComparison": "상세 벤더 비교",
+    "table": {
+      "vendor": "벤더",
+      "revenue": "수익",
+      "soh": "건강도",
+      "cycles": "사이클",
+      "roi": "ROI",
+      "payback": "회수기간",
+      "npv": "순현재가치",
+      "best": "최고",
+      "baseline": "기준선 (ESS 없음)",
+      "years": "년"
+    }
+  },
+  "story": {
+    "problemTitle": "문제점",
+    "problemText1": "휴머노이드 로봇은 효율적이고 비용 효과적인 충전 인프라가 필요합니다. 기존 전력망 전용 솔루션은 피크 시간대에 높은 전기 요금에 직면합니다. 태양광 + ESS(에너지 저장 시스템) 조합은 비용 절감을 약속하지만, <strong>어떤 배터리 벤더가 최고의 ROI를 제공할까요?</strong>",
+    "problemText2": "이 프로젝트는 한국 태양광 발전소와 전력 거래소(SMP) 가격의 실제 데이터를 사용하여 LG 에너지솔루션, 삼성 SDI, 테슬라 등 세 글로벌 배터리 제조업체를 비교합니다.",
+    "solutionTitle": "솔루션",
+    "solutionIntro": "SolarX는 세 가지 핵심 구성 요소를 결합합니다:",
+    "solutionItem1Title": "LSTM 신경망",
+    "solutionItem1Desc": "기상 데이터(온도, 습도, 일사량, 구름)를 사용하여 24시간 앞의 태양광 발전량을 예측합니다",
+    "solutionItem2Title": "물리 기반 배터리 모델",
+    "solutionItem2Desc": "C-rate 제한, 온도 효과, 효율 손실, 성능 저하(SOH 추적)를 포함한 실제 배터리 동작을 시뮬레이션합니다",
+    "solutionItem3Title": "경제성 분석",
+    "solutionItem3Desc": "실제 한국 SMP(계통한계가격) 데이터를 사용하여 CAPEX, OPEX, ROI, 회수 기간 및 NPV를 계산합니다",
+    "evolutionTitle": "개발 과정",
+    "v1Title": "v1.0 - 기본 시뮬레이션 (1주차)",
+    "v1Achievement": "성과",
+    "v1AchievementText": "더미 데이터를 사용한 기본 배터리 충/방전 시뮬레이션",
+    "v1Learning": "학습",
+    "v1LearningText": "단순화된 가정으로 인해 실제 복잡성을 놓침",
+    "v1Metrics": "지표",
+    "v1MetricsText": "예측 없음, 수동 가격 임계값, 일정한 효율",
+    "v2Title": "v2.0 - LSTM 통합 (2주차)",
+    "v2AchievementText": "한국 동해의 실제 태양광 발전소 데이터로 LSTM 학습",
+    "v2LearningText": "예측 정확도(MAPE) 향상으로 의사 결정 품질 개선",
+    "v2MetricsText": "MAE: 53.78 kW, RMSE: 92.56 kW, MAPE: 60.08%",
+    "v3Title": "v3.0 - 물리 기반 모델 (3주차)",
+    "v3AchievementText": "C-rate 제한, SOC 제약, 온도 의존 효율 추가",
+    "v3LearningText": "배터리 성능 저하(SOH)가 장기 경제성에 중요함을 확인",
+    "v3MetricsText": "SOH 추적 구현, 사이클 계산 추가",
+    "v4Title": "v4.0 - 경제성 분석 (4주차)",
+    "v4AchievementText": "벤더별 비용을 포함한 전체 CAPEX/OPEX 모델링",
+    "v4LearningText": "삼성 SDI가 낮은 효율에도 불구하고 우수한 성능 저하율로 승리",
+    "v4MetricsText": "ROI: 12,765%, 회수 기간: 0.0년 (데이터 제한), NPV 계산",
+    "v5Title": "v5.0 - 웹 애플리케이션 (현재)",
+    "v5AchievementText": "대화형 데모를 포함한 React + FastAPI 웹 인터페이스",
+    "v5LearningText": "포트폴리오 발표를 위해 기술적 깊이와 UX 품질 모두 필요",
+    "v5MetricsText": "100% 테스트 커버리지, Docker 배포, 5초 이내 시뮬레이션 실행",
+    "keyInsights": "주요 인사이트",
+    "insight1Title": "효율 ≠ 승자",
+    "insight1Text": "삼성이 98.5% 효율(테슬라 97% 대비)에도 불구하고 우수한 성능 저하 저항성(사이클당 0.00009 vs 0.0001)으로 승리",
+    "insight2Title": "C-Rate의 중요성",
+    "insight2Text": "LG의 2.0C는 더 빠른 충전을 허용하지만 더 많은 스트레스를 유발. 삼성의 균형 잡힌 1.8C가 내구성에 최적임을 입증",
+    "insight3Title": "예측 품질",
+    "insight3Text": "무작위 기준선 대비 10배 개선 (MAE: 53.78 kW vs ~500 kW 무작위 추측)"
+  },
+  "architecture": {
+    "title": "시스템 아키텍처",
+    "subtitle": "SolarX 배터리 최적화 시스템의 기술 개요",
+    "dataFlowTitle": "데이터 흐름",
+    "dataFlowText": "시스템은 데이터 수집부터 경제성 분석까지 순차적 파이프라인을 따릅니다:",
+    "componentsTitle": "핵심 구성 요소",
+    "apiTitle": "API 엔드포인트",
+    "deploymentTitle": "배포 아키텍처"
+  }
+}

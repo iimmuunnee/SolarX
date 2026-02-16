@@ -1,0 +1,115 @@
+name: Build and Deploy SolarX
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: solarx-web:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Test Docker container
+        run: |
+          docker run -d -p 8000:8000 --name solarx-test solarx-web:latest
+          sleep 30
+          curl -f http://localhost:8000/api/health || exit 1
+          docker logs solarx-test
+          docker stop solarx-test
+
+  deploy-ghcr:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push to GHCR
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Optional: Deploy to Google Cloud Run
+  # Uncomment and configure secrets to enable
+  # deploy-cloud-run:
+  #   needs: deploy-ghcr
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+  #
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Set up Cloud SDK
+  #       uses: google-github-actions/setup-gcloud@v2
+  #       with:
+  #         service_account_key: ${{ secrets.GCP_SA_KEY }}
+  #         project_id: ${{ secrets.GCP_PROJECT_ID }}
+  #
+  #     - name: Configure Docker for GCR
+  #       run: gcloud auth configure-docker
+  #
+  #     - name: Build and push to GCR
+  #       run: |
+  #         docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/solarx-web:latest .
+  #         docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/solarx-web:latest
+  #
+  #     - name: Deploy to Cloud Run
+  #       run: |
+  #         gcloud run deploy solarx \
+  #           --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/solarx-web:latest \
+  #           --platform managed \
+  #           --region us-central1 \
+  #           --allow-unauthenticated \
+  #           --memory 2Gi \
+  #           --cpu 1 \
+  #           --port 8000
