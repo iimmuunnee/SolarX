@@ -15,36 +15,61 @@ interface MetricsGridProps {
 export const MetricsGrid = ({ vendorResult, predictionMetrics, metadata }: MetricsGridProps) => {
   const { t } = useTranslation('charts');
 
+  // SpaceX minimal card styling
+  const minimalCardStyle = {
+    bg: 'spacex.darkGray',
+    borderWidth: '1px',
+    borderColor: 'spacex.borderGray',
+    borderRadius: '0',
+    transition: 'all 0.3s ease',
+    _hover: {
+      borderColor: 'white',
+      transform: 'translateY(-2px)',
+    },
+  };
+
   return (
     <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
       {/* Prediction Metrics */}
       {predictionMetrics && (
         <>
-          <Card>
+          <Card {...minimalCardStyle}>
             <CardBody>
               <Stat>
-                <StatLabel>{t('metrics.mae.label')}</StatLabel>
-                <StatNumber>{formatNumber(predictionMetrics.mae_kw, 2)} kW</StatNumber>
+                <StatLabel color="spacex.textGray" textTransform="uppercase" fontSize="xs">
+                  {t('metrics.mae.label')}
+                </StatLabel>
+                <StatNumber color="white" fontSize="2xl" fontWeight="bold">
+                  {formatNumber(predictionMetrics.mae_kw, 2)} kW
+                </StatNumber>
                 <StatHelpText>{t('metrics.mae.help')}</StatHelpText>
               </Stat>
             </CardBody>
           </Card>
 
-          <Card>
+          <Card {...minimalCardStyle}>
             <CardBody>
               <Stat>
-                <StatLabel>{t('metrics.rmse.label')}</StatLabel>
-                <StatNumber>{formatNumber(predictionMetrics.rmse_kw, 2)} kW</StatNumber>
+                <StatLabel color="spacex.textGray" textTransform="uppercase" fontSize="xs">
+                  {t('metrics.rmse.label')}
+                </StatLabel>
+                <StatNumber color="white" fontSize="2xl" fontWeight="bold">
+                  {formatNumber(predictionMetrics.rmse_kw, 2)} kW
+                </StatNumber>
                 <StatHelpText>{t('metrics.rmse.help')}</StatHelpText>
               </Stat>
             </CardBody>
           </Card>
 
-          <Card>
+          <Card {...minimalCardStyle}>
             <CardBody>
               <Stat>
-                <StatLabel>{t('metrics.mape.label')}</StatLabel>
-                <StatNumber>{formatPercent(predictionMetrics.mape_percent, 2)}</StatNumber>
+                <StatLabel color="spacex.textGray" textTransform="uppercase" fontSize="xs">
+                  {t('metrics.mape.label')}
+                </StatLabel>
+                <StatNumber color="white" fontSize="2xl" fontWeight="bold">
+                  {formatPercent(predictionMetrics.mape_percent, 2)}
+                </StatNumber>
                 <StatHelpText>{t('metrics.mape.help')}</StatHelpText>
               </Stat>
             </CardBody>
@@ -55,61 +80,93 @@ export const MetricsGrid = ({ vendorResult, predictionMetrics, metadata }: Metri
       {/* Vendor Results */}
       {vendorResult && (
         <>
-          <Card>
+          <Card {...minimalCardStyle}>
             <CardBody>
               <Stat>
-                <StatLabel>{t('metrics.revenue.label')}</StatLabel>
-                <StatNumber>{formatKRW(vendorResult.revenue_krw, 0)}</StatNumber>
+                <StatLabel color="spacex.textGray" textTransform="uppercase" fontSize="xs">
+                  {t('metrics.revenue.label')}
+                </StatLabel>
+                <StatNumber color="white" fontSize="2xl" fontWeight="bold">
+                  {formatKRW(vendorResult.revenue_krw, 0)}
+                </StatNumber>
                 <StatHelpText>{t('metrics.revenue.help', { vendor: vendorResult.vendor_name })}</StatHelpText>
               </Stat>
             </CardBody>
           </Card>
 
-          <Card>
+          <Card {...minimalCardStyle}>
             <CardBody>
               <Stat>
-                <StatLabel>{t('metrics.soh.label')}</StatLabel>
-                <StatNumber>{formatPercent(vendorResult.soh_percent, 2)}</StatNumber>
+                <StatLabel color="spacex.textGray" textTransform="uppercase" fontSize="xs">
+                  {t('metrics.soh.label')}
+                </StatLabel>
+                <StatNumber color="white" fontSize="2xl" fontWeight="bold">
+                  {formatPercent(vendorResult.soh_percent, 2)}
+                </StatNumber>
                 <StatHelpText>{t('metrics.soh.help', { cycles: formatNumber(vendorResult.cycle_count, 1) })}</StatHelpText>
               </Stat>
             </CardBody>
           </Card>
 
-          <Card>
+          <Card {...minimalCardStyle}>
             <CardBody>
               <Stat>
-                <StatLabel>{t('metrics.throughput.label')}</StatLabel>
-                <StatNumber>{formatEnergy(vendorResult.throughput_kwh, 'kWh')}</StatNumber>
+                <StatLabel color="spacex.textGray" textTransform="uppercase" fontSize="xs">
+                  {t('metrics.throughput.label')}
+                </StatLabel>
+                <StatNumber color="white" fontSize="2xl" fontWeight="bold">
+                  {formatEnergy(vendorResult.throughput_kwh, 'kWh')}
+                </StatNumber>
                 <StatHelpText>{t('metrics.throughput.help')}</StatHelpText>
               </Stat>
             </CardBody>
           </Card>
 
-          <Card>
+          <Card {...minimalCardStyle}>
             <CardBody>
               <Stat>
-                <StatLabel>{t('metrics.roi.label')}</StatLabel>
-                <StatNumber>{formatPercent(vendorResult.roi_percent, 2)}</StatNumber>
+                <StatLabel color="spacex.textGray" textTransform="uppercase" fontSize="xs">
+                  {t('metrics.roi.label')}
+                </StatLabel>
+                <StatNumber
+                  color={vendorResult.roi_percent >= 0 ? 'battery.excellent' : 'battery.critical'}
+                  fontSize="2xl"
+                  fontWeight="bold"
+                >
+                  {formatPercent(vendorResult.roi_percent, 2)}
+                </StatNumber>
                 <StatHelpText>{t('metrics.roi.help', { years: formatNumber(vendorResult.payback_years, 1) })}</StatHelpText>
               </Stat>
             </CardBody>
           </Card>
 
-          <Card>
+          <Card {...minimalCardStyle}>
             <CardBody>
               <Stat>
-                <StatLabel>{t('metrics.capex.label')}</StatLabel>
-                <StatNumber>{formatKRW(vendorResult.capex_krw, 0)}</StatNumber>
+                <StatLabel color="spacex.textGray" textTransform="uppercase" fontSize="xs">
+                  {t('metrics.capex.label')}
+                </StatLabel>
+                <StatNumber color="white" fontSize="2xl" fontWeight="bold">
+                  {formatKRW(vendorResult.capex_krw, 0)}
+                </StatNumber>
                 <StatHelpText>{t('metrics.capex.help')}</StatHelpText>
               </Stat>
             </CardBody>
           </Card>
 
-          <Card>
+          <Card {...minimalCardStyle}>
             <CardBody>
               <Stat>
-                <StatLabel>{t('metrics.npv.label')}</StatLabel>
-                <StatNumber>{formatKRW(vendorResult.npv_krw, 0)}</StatNumber>
+                <StatLabel color="spacex.textGray" textTransform="uppercase" fontSize="xs">
+                  {t('metrics.npv.label')}
+                </StatLabel>
+                <StatNumber
+                  color={vendorResult.npv_krw >= 0 ? 'battery.excellent' : 'battery.critical'}
+                  fontSize="2xl"
+                  fontWeight="bold"
+                >
+                  {formatKRW(vendorResult.npv_krw, 0)}
+                </StatNumber>
                 <StatHelpText>{t('metrics.npv.help')}</StatHelpText>
               </Stat>
             </CardBody>
@@ -120,21 +177,29 @@ export const MetricsGrid = ({ vendorResult, predictionMetrics, metadata }: Metri
       {/* Simulation Metadata */}
       {metadata && (
         <>
-          <Card>
+          <Card {...minimalCardStyle}>
             <CardBody>
               <Stat>
-                <StatLabel>{t('metrics.duration.label')}</StatLabel>
-                <StatNumber>{metadata.duration_hours} {t('metrics.duration.hours')}</StatNumber>
+                <StatLabel color="spacex.textGray" textTransform="uppercase" fontSize="xs">
+                  {t('metrics.duration.label')}
+                </StatLabel>
+                <StatNumber color="white" fontSize="2xl" fontWeight="bold">
+                  {metadata.duration_hours} {t('metrics.duration.hours')}
+                </StatNumber>
                 <StatHelpText>{t('metrics.duration.years', { years: formatNumber(metadata.simulation_years, 2) })}</StatHelpText>
               </Stat>
             </CardBody>
           </Card>
 
-          <Card>
+          <Card {...minimalCardStyle}>
             <CardBody>
               <Stat>
-                <StatLabel>{t('metrics.avgPrice.label')}</StatLabel>
-                <StatNumber>{formatKRW(metadata.avg_smp_price, 2)}/kWh</StatNumber>
+                <StatLabel color="spacex.textGray" textTransform="uppercase" fontSize="xs">
+                  {t('metrics.avgPrice.label')}
+                </StatLabel>
+                <StatNumber color="white" fontSize="2xl" fontWeight="bold">
+                  {formatKRW(metadata.avg_smp_price, 2)}/kWh
+                </StatNumber>
                 <StatHelpText>{t('metrics.avgPrice.help')}</StatHelpText>
               </Stat>
             </CardBody>

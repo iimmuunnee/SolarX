@@ -37,6 +37,8 @@ export interface VendorResult {
   roi_percent: number;
   payback_years: number;
   npv_krw: number;
+  final_soc_percent: number;
+  avg_soc_percent: number;
 }
 
 export interface BaselineResult {

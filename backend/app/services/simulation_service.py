@@ -142,15 +142,16 @@ class SimulationService:
         charge_threshold: float,
         discharge_threshold: float,
         allow_grid_charge: bool,
-    ) -> Tuple[float, List[float]]:
+    ) -> Tuple[float, List[float], float]:
         """Run simulation for a single battery.
 
         Returns:
-            Tuple of (total_profit, profit_history)
+            Tuple of (total_profit, profit_history, avg_soc)
         """
         avg_price = np.mean(real_prices)
         profit = 0.0
         history = []
+        soc_history = []
 
         for t in range(len(y_real_kw)):
             gen_kw = y_real_kw[t]
@@ -179,29 +180,36 @@ class SimulationService:
 
             profit += trade_kw * self.dt_hours * price
             history.append(profit)
+            soc_history.append(battery.get_soc())
 
-        return profit, history
+        avg_soc = float(np.mean(soc_history)) if soc_history else 0.5
+        return profit, history, avg_soc
 
     def _create_vendor_result(
         self,
         battery: ESSBattery,
         profit: float,
+        avg_soc: float,
         capacity_kwh: float,
         simulation_years: float,
     ) -> VendorResult:
         """Create VendorResult from battery simulation."""
         status = battery.get_status()
         cost_model = VENDOR_COSTS[battery.name]
-        capex = cost_model.total_capex(capacity_kwh)
 
-        # Convert USD to KRW (approximate rate: 1 USD = 1320 KRW)
+        # Convert USD to KRW before ROI calculation (1 USD = 1320 KRW)
         usd_to_krw = 1320
+        capex_krw = cost_model.total_capex(capacity_kwh) * usd_to_krw
+        opex_annual_krw = cost_model.ohm_cost_per_year * usd_to_krw
 
+        # Project annual revenue over 10 years for meaningful investment analysis
+        PROJECTION_YEARS = 10
+        annual_revenue = profit / max(simulation_years, 1 / 12)
         roi_metrics = calculate_roi(
-            total_revenue=profit,
-            capex=capex,
-            opex_annual=cost_model.ohm_cost_per_year,
-            years=max(simulation_years, 1)
+            total_revenue=annual_revenue * PROJECTION_YEARS,  # KRW, 10-year projection
+            capex=capex_krw,                                   # KRW
+            opex_annual=opex_annual_krw,                       # KRW
+            years=PROJECTION_YEARS
         )
 
         # Map vendor names to IDs
@@ -211,6 +219,9 @@ class SimulationService:
             "Tesla In-house (4680)": "tesla",
         }
 
+        final_soc_percent = status['soc'] * 100.0
+        avg_soc_percent = avg_soc * 100.0
+
         return VendorResult(
             vendor_id=vendor_id_map.get(battery.name, battery.name.lower()),
             vendor_name=battery.name,
@@ -218,11 +229,13 @@ class SimulationService:
             soh_percent=status['soh'] * 100,
             cycle_count=status['cycle_count'],
             throughput_kwh=status['total_throughput_kwh'],
-            capex_krw=capex * usd_to_krw,
-            opex_annual_krw=cost_model.ohm_cost_per_year * usd_to_krw,
+            capex_krw=capex_krw,
+            opex_annual_krw=opex_annual_krw,
             roi_percent=roi_metrics['roi_percent'],
             payback_years=roi_metrics['payback_period_years'],
-            npv_krw=roi_metrics['npv'] * usd_to_krw,
+            npv_krw=roi_metrics['npv'],  # already KRW, no conversion needed
+            final_soc_percent=final_soc_percent,
+            avg_soc_percent=avg_soc_percent,
         )
 
     def run_benchmark(self, request: BenchmarkRequest) -> BenchmarkResponse:
@@ -253,7 +266,7 @@ class SimulationService:
         all_histories = {}
 
         for batt in batteries:
-            profit, history = self._simulate_battery(
+            profit, history, avg_soc = self._simulate_battery(
                 battery=batt,
                 y_real_kw=y_real_scaled,
                 y_pred_kw=self.y_pred_kw * request.region_factor,
@@ -264,7 +277,7 @@ class SimulationService:
             )
 
             simulation_years = len(y_real_scaled) / (24 * 365)
-            vendor_result = self._create_vendor_result(batt, profit, battery_capacity_kwh, simulation_years)
+            vendor_result = self._create_vendor_result(batt, profit, avg_soc, battery_capacity_kwh, simulation_years)
             vendor_results.append(vendor_result)
             all_histories[vendor_result.vendor_id] = history
 
@@ -316,7 +329,7 @@ class SimulationService:
             baseline_history.append(base_profit)
 
         # Simulate
-        profit, history = self._simulate_battery(
+        profit, history, avg_soc = self._simulate_battery(
             battery=battery,
             y_real_kw=y_real_scaled,
             y_pred_kw=self.y_pred_kw * request.region_factor,
@@ -327,7 +340,7 @@ class SimulationService:
         )
 
         simulation_years = len(y_real_scaled) / (24 * 365)
-        vendor_result = self._create_vendor_result(battery, profit, request.battery_capacity_kwh, simulation_years)
+        vendor_result = self._create_vendor_result(battery, profit, avg_soc, request.battery_capacity_kwh, simulation_years)
 
         # Create time series data (only single vendor)
         hours = list(range(len(y_real_scaled)))

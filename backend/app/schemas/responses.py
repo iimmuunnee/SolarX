@@ -37,6 +37,8 @@ class VendorResult(BaseModel):
     roi_percent: float = Field(..., description="Return on investment in %")
     payback_years: float = Field(..., description="Payback period in years")
     npv_krw: float = Field(..., description="Net present value in KRW")
+    final_soc_percent: float = Field(..., description="Final State of Charge at simulation end in %")
+    avg_soc_percent: float = Field(..., description="Average State of Charge during simulation in %")
 
 
 class BaselineResult(BaseModel):

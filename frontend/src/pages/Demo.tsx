@@ -7,6 +7,7 @@ import {
   Grid,
   Heading,
   VStack,
+  HStack,
   FormControl,
   FormLabel,
   Slider,
@@ -22,6 +23,8 @@ import {
   Select,
   Skeleton,
   SkeletonText,
+  SimpleGrid,
+  Tooltip,
 } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import { Section } from '../components/layout/Section';
@@ -29,6 +32,9 @@ import { useSimulation } from '../hooks/useSimulation';
 import { ProfitChart } from '../components/charts/ProfitChart';
 import { PredictionChart } from '../components/charts/PredictionChart';
 import { MetricsGrid } from '../components/charts/MetricsGrid';
+import { BatteryGauge, SOC_EXPLANATION, SOC_LOW_THRESHOLD } from '../components/battery/BatteryGauge';
+import { CircularSOHGauge } from '../components/battery/CircularSOHGauge';
+import { MethodologyPanel } from '../components/charts/MethodologyPanel';
 import type { BenchmarkRequest } from '../types/simulation';
 
 export const Demo = () => {
@@ -54,6 +60,9 @@ export const Demo = () => {
 
   const benchmarkResult = result && 'vendors' in result ? result : null;
 
+  const hasLowSOC =
+    benchmarkResult?.vendors.some((v) => v.avg_soc_percent < SOC_LOW_THRESHOLD) ?? false;
+
   return (
     <Box>
       <Section>
@@ -63,16 +72,26 @@ export const Demo = () => {
         </Text>
 
         <Grid templateColumns={{ base: '1fr', lg: '1fr 2fr' }} gap={8}>
-          {/* Parameter Panel */}
+          {/* Parameter Panel - Neon Style */}
           <VStack spacing={6} align="stretch">
-            <Box p={6} borderWidth={1} borderRadius="lg">
-              <Heading size="md" mb={4}>
+            <Box
+              p={6}
+              bg="spacex.darkGray"
+              borderWidth="2px"
+              borderColor="spacex.borderGray"
+              borderRadius="lg"
+              boxShadow="0 0 10px rgba(0, 102, 255, 0.3)"
+              backdropFilter="blur(10px)"
+            >
+              <Heading size="md" mb={4} color="white">
                 {t('pages:demo.parameters.title')}
               </Heading>
 
               {/* Battery Capacity */}
               <FormControl mb={4}>
-                <FormLabel>{t('pages:demo.parameters.batteryCapacity')}: {params.battery_capacity_kwh} kWh</FormLabel>
+                <FormLabel color="gray.300">
+                  {t('pages:demo.parameters.batteryCapacity')}: <Text as="span" color="white" fontWeight="bold">{params.battery_capacity_kwh} kWh</Text>
+                </FormLabel>
                 <Slider
                   value={params.battery_capacity_kwh}
                   min={500}
@@ -80,19 +99,21 @@ export const Demo = () => {
                   step={100}
                   onChange={(value) => setParams({ ...params, battery_capacity_kwh: value })}
                 >
-                  <SliderTrack>
-                    <SliderFilledTrack />
+                  <SliderTrack bg="gray.700">
+                    <SliderFilledTrack bg="white" boxShadow="0 0 8px rgba(0, 217, 255, 0.5)" />
                   </SliderTrack>
-                  <SliderThumb />
+                  <SliderThumb boxSize={6} bg="white" />
                 </Slider>
-                <Text fontSize="sm" color="gray.600" mt={1}>
+                <Text fontSize="sm" color="gray.500" mt={1}>
                   {t('pages:demo.parameters.batteryCapacityRange')}
                 </Text>
               </FormControl>
 
               {/* Charge Threshold */}
               <FormControl mb={4}>
-                <FormLabel>{t('pages:demo.parameters.chargeThreshold')}: {params.charge_threshold}×</FormLabel>
+                <FormLabel color="gray.300">
+                  {t('pages:demo.parameters.chargeThreshold')}: <Text as="span" color="white" fontWeight="bold">{params.charge_threshold}×</Text>
+                </FormLabel>
                 <Slider
                   value={params.charge_threshold}
                   min={0.5}
@@ -100,19 +121,21 @@ export const Demo = () => {
                   step={0.05}
                   onChange={(value) => setParams({ ...params, charge_threshold: value })}
                 >
-                  <SliderTrack>
-                    <SliderFilledTrack />
+                  <SliderTrack bg="gray.700">
+                    <SliderFilledTrack bg="white" boxShadow="0 0 8px rgba(0, 217, 255, 0.5)" />
                   </SliderTrack>
-                  <SliderThumb />
+                  <SliderThumb boxSize={6} bg="white" />
                 </Slider>
-                <Text fontSize="sm" color="gray.600" mt={1}>
+                <Text fontSize="sm" color="gray.500" mt={1}>
                   {t('pages:demo.parameters.chargeThresholdHelp', { threshold: params.charge_threshold })}
                 </Text>
               </FormControl>
 
               {/* Discharge Threshold */}
               <FormControl mb={4}>
-                <FormLabel>{t('pages:demo.parameters.dischargeThreshold')}: {params.discharge_threshold}×</FormLabel>
+                <FormLabel color="gray.300">
+                  {t('pages:demo.parameters.dischargeThreshold')}: <Text as="span" color="white" fontWeight="bold">{params.discharge_threshold}×</Text>
+                </FormLabel>
                 <Slider
                   value={params.discharge_threshold}
                   min={0.7}
@@ -120,12 +143,12 @@ export const Demo = () => {
                   step={0.05}
                   onChange={(value) => setParams({ ...params, discharge_threshold: value })}
                 >
-                  <SliderTrack>
-                    <SliderFilledTrack />
+                  <SliderTrack bg="gray.700">
+                    <SliderFilledTrack bg="white" boxShadow="0 0 8px rgba(0, 217, 255, 0.5)" />
                   </SliderTrack>
-                  <SliderThumb />
+                  <SliderThumb boxSize={6} bg="white" />
                 </Slider>
-                <Text fontSize="sm" color="gray.600" mt={1}>
+                <Text fontSize="sm" color="gray.500" mt={1}>
                   {t('pages:demo.parameters.dischargeThresholdHelp', { threshold: params.discharge_threshold })}
                 </Text>
               </FormControl>
@@ -154,7 +177,7 @@ export const Demo = () => {
 
               {/* Run Button */}
               <Button
-                colorScheme="blue"
+                variant="spacexSolid"
                 size="lg"
                 w="full"
                 onClick={handleRunSimulation}
@@ -164,6 +187,68 @@ export const Demo = () => {
                 {t('common:buttons.runSimulation')}
               </Button>
             </Box>
+
+            {/* Battery Gauges (show when results exist) */}
+            {benchmarkResult && !loading && (
+              <Box
+                position="relative"
+                p={6}
+                bg="spacex.darkGray"
+                borderWidth="1px"
+                borderColor="spacex.borderGray"
+                borderRadius="0"
+              >
+                <Heading size="md" mb={4} color="white" textAlign="center">
+                  Battery Status
+                </Heading>
+
+                {/* Single SOC tooltip — shown only when any battery SOC is low */}
+                {hasLowSOC && (
+                  <Tooltip
+                    label={SOC_EXPLANATION}
+                    placement="top-end"
+                    hasArrow
+                    bg="gray.700"
+                    color="white"
+                    fontSize="xs"
+                    maxW="260px"
+                    p={3}
+                    borderRadius="md"
+                    textAlign="left"
+                  >
+                    <Text
+                      position="absolute"
+                      top={3}
+                      right={4}
+                      fontSize="2xs"
+                      color="spacex.textGray"
+                      textTransform="uppercase"
+                      letterSpacing="wide"
+                      cursor="help"
+                      borderBottom="1px dotted"
+                      borderBottomColor="spacex.textGray"
+                      _hover={{ color: 'white', borderBottomColor: 'white' }}
+                    >
+                      왜 SOC가 낮나요?
+                    </Text>
+                  </Tooltip>
+                )}
+
+                <SimpleGrid columns={1} spacing={6}>
+                  {benchmarkResult.vendors.map((vendor) => (
+                    <VStack key={vendor.vendor_id} spacing={4}>
+                      <Text color="gray.300" fontWeight="bold" fontSize="sm" textTransform="uppercase">
+                        {vendor.vendor_name}
+                      </Text>
+                      <HStack spacing={6} justify="center">
+                        <BatteryGauge soc={vendor.avg_soc_percent} width="70px" height="140px" />
+                        <CircularSOHGauge soh={vendor.soh_percent} size={100} />
+                      </HStack>
+                    </VStack>
+                  ))}
+                </SimpleGrid>
+              </Box>
+            )}
           </VStack>
 
           {/* Results Panel */}
@@ -205,14 +290,46 @@ export const Demo = () => {
                 </Box>
 
                 <Box>
-                  <Heading size="md" mb={4}>
+                  <Heading size="md" mb={6}>
                     {t('pages:demo.results.vendorResults')}
                   </Heading>
-                  {benchmarkResult.vendors.map((vendor) => (
-                    <Box key={vendor.vendor_id} mb={6}>
-                      <MetricsGrid vendorResult={vendor} />
-                    </Box>
-                  ))}
+                  {benchmarkResult.vendors.map((vendor) => {
+                    const vendorColors: Record<string, string> = {
+                      lg: '#10B981',
+                      samsung: '#3B82F6',
+                      tesla: '#EF4444',
+                    };
+                    const color = vendorColors[vendor.vendor_id] ?? 'white';
+                    return (
+                      <Box
+                        key={vendor.vendor_id}
+                        mb={10}
+                        borderLeft="4px solid"
+                        borderColor={color}
+                        pl={5}
+                      >
+                        <HStack mb={4} spacing={3}>
+                          <Box w="8px" h="8px" borderRadius="full" bg={color} flexShrink={0} />
+                          <Heading
+                            size="sm"
+                            color={color}
+                            textTransform="uppercase"
+                            letterSpacing="wider"
+                          >
+                            {vendor.vendor_name}
+                          </Heading>
+                        </HStack>
+                        <MetricsGrid vendorResult={vendor} />
+                      </Box>
+                    );
+                  })}
+                </Box>
+
+                <Box>
+                  <MethodologyPanel
+                    capacityKwh={params.battery_capacity_kwh}
+                    vendors={benchmarkResult.vendors}
+                  />
                 </Box>
               </>
             )}

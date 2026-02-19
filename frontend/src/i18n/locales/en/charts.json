@@ -1,22 +1,22 @@
 {
   "profitChart": {
     "title": "Cumulative Profit Over Time",
-    "xAxis": "Hours",
+    "xAxis": "Day",
     "yAxis": "Profit (KRW)",
     "tooltip": {
-      "hour": "Hour {{hour}}"
+      "hour": "Day {{day}}"
     }
   },
   "predictionChart": {
     "title": "LSTM Prediction vs Actual Solar Generation",
-    "xAxis": "Hours",
+    "xAxis": "Hour (h)",
     "yAxis": "Power (kW)",
     "legend": {
       "actual": "Actual Solar",
       "predicted": "LSTM Prediction"
     },
     "tooltip": {
-      "hour": "Hour {{hour}}"
+      "hour": "{{hour}}h"
     }
   },
   "metrics": {

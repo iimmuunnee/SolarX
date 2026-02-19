@@ -16,7 +16,7 @@ export const Footer = () => {
           </Text>
           <Flex gap={4}>
             <Link
-              href="https://github.com/yourusername/solarx"
+              href="https://github.com/iimmuunnee/solarx"
               isExternal
               fontSize="sm"
               color="blue.500"

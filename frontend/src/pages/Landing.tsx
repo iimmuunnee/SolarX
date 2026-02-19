@@ -7,130 +7,149 @@ import {
   Text,
   Button,
   VStack,
-  HStack,
   SimpleGrid,
   Card,
   CardBody,
-  useColorModeValue,
 } from '@chakra-ui/react';
+import { ArrowForwardIcon } from '@chakra-ui/icons';
 import { Link as RouterLink } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { Section } from '../components/layout/Section';
+import { SolarChargingAnimation } from '../components/animations/SolarChargingAnimation';
 
 export const Landing = () => {
   const { t } = useTranslation(['common', 'pages']);
-  const gradientBg = useColorModeValue(
-    'linear(to-r, blue.400, purple.500)',
-    'linear(to-r, blue.600, purple.700)'
-  );
 
   return (
     <Box>
-      {/* Hero Section */}
-      <Box bgGradient={gradientBg} color="white" py={20}>
-        <Section maxW="5xl">
-          <VStack spacing={6} textAlign="center">
-            <Heading as="h1" size="2xl" fontWeight="bold">
-              {t('pages:landing.hero.title')}
-            </Heading>
-            <Text fontSize="xl" maxW="3xl">
-              {t('pages:landing.hero.subtitle')}
-            </Text>
+      {/* Hero Section - 2-column layout */}
+      <Box
+        minH="100vh"
+        display="flex"
+        alignItems="center"
+        bg="spacex.black"
+        color="white"
+        position="relative"
+      >
+        <Box w="100%">
+        <Section maxW="7xl" py={20}>
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={12} alignItems="center">
+            {/* Left: Text content */}
+            <VStack spacing={6} align="flex-start">
+              <Heading
+                as="h1"
+                fontSize={{ base: '5xl', md: '7xl', lg: '8xl' }}
+                fontWeight="900"
+                color="white"
+                lineHeight="0.9"
+                letterSpacing="tighter"
+                textAlign={{ base: 'center', md: 'left' }}
+              >
+                {/* Line 1: nowrap ensures it never breaks mid-word */}
+                <Box as="span" display="block" whiteSpace="nowrap">
+                  {t('pages:landing.hero.titleLine1')}
+                </Box>
+                <Box as="span" display="block">
+                  {t('pages:landing.hero.titleLine2')}
+                </Box>
+              </Heading>
 
-            {/* Animated Metrics */}
-            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8} mt={8} w="full">
-              <VStack>
-                <Heading size="xl">3</Heading>
-                <Text>{t('pages:landing.hero.metrics.vendors')}</Text>
-              </VStack>
-              <VStack>
-                <Heading size="xl">99.3%</Heading>
-                <Text>{t('pages:landing.hero.metrics.soh')}</Text>
-              </VStack>
-              <VStack>
-                <Heading size="xl">12,765%</Heading>
-                <Text>{t('pages:landing.hero.metrics.roi')}</Text>
-              </VStack>
-            </SimpleGrid>
+              <Text
+                fontSize={{ base: 'md', md: 'lg' }}
+                maxW="500px"
+                color="gray.400"
+                textAlign={{ base: 'center', md: 'left' }}
+              >
+                <Trans
+                  i18nKey="pages:landing.hero.subtitle"
+                  components={{ br: <br /> }}
+                />
+              </Text>
 
-            {/* CTA Buttons */}
-            <HStack spacing={4} mt={8}>
               <Button
                 as={RouterLink}
                 to="/demo"
                 size="lg"
-                colorScheme="white"
-                variant="solid"
-                bg="white"
-                color="blue.500"
-                _hover={{ bg: 'gray.100' }}
+                variant="spacexSolar"
+                rightIcon={<ArrowForwardIcon />}
+                mt={4}
+                alignSelf={{ base: 'center', md: 'flex-start' }}
               >
                 {t('common:buttons.tryDemo')}
               </Button>
-              <Button
-                as={RouterLink}
-                to="/results"
-                size="lg"
-                variant="outline"
-                color="white"
-                borderColor="white"
-                _hover={{ bg: 'whiteAlpha.200' }}
-              >
-                {t('common:buttons.viewResults')}
-              </Button>
-            </HStack>
-          </VStack>
+            </VStack>
+
+            {/* Right: Solar charging animation (desktop only) */}
+            <Box
+              display={{ base: 'none', md: 'flex' }}
+              justifyContent="center"
+              alignItems="center"
+            >
+              <SolarChargingAnimation />
+            </Box>
+          </SimpleGrid>
         </Section>
+        </Box>
       </Box>
 
-      {/* Tech Stack */}
-      <Section py={12}>
-        <HStack justify="center" spacing={4} flexWrap="wrap">
-          <img src="https://img.shields.io/badge/Python-3.9+-blue?logo=python" alt="Python" />
-          <img src="https://img.shields.io/badge/PyTorch-2.1-red?logo=pytorch" alt="PyTorch" />
-          <img src="https://img.shields.io/badge/React-18-61DAFB?logo=react" alt="React" />
-          <img src="https://img.shields.io/badge/FastAPI-0.109-009688?logo=fastapi" alt="FastAPI" />
-        </HStack>
+      {/* Metrics Section - Separated */}
+      <Section py={20}>
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={16}>
+          {[
+            { value: '3', label: t('pages:landing.hero.metrics.vendors') },
+            { value: '99.3%', label: t('pages:landing.hero.metrics.soh') },
+            { value: '284%', label: t('pages:landing.hero.metrics.roi') },
+          ].map((metric, index) => (
+            <VStack key={index} spacing={3} align="center">
+              <Heading size="3xl" color="solar.gold" fontWeight="800">
+                {metric.value}
+              </Heading>
+              <Text
+                color="gray.500"
+                textTransform="uppercase"
+                fontSize="xs"
+                letterSpacing="widest"
+              >
+                {metric.label}
+              </Text>
+            </VStack>
+          ))}
+        </SimpleGrid>
       </Section>
 
-      {/* Quick Navigation Cards */}
-      <Section>
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
-          <Card as={RouterLink} to="/story" _hover={{ shadow: 'lg', transform: 'translateY(-4px)' }} transition="all 0.2s">
-            <CardBody>
-              <Heading size="md" mb={2}>{t('pages:landing.cards.story.title')}</Heading>
-              <Text fontSize="sm" color="gray.600">
-                {t('pages:landing.cards.story.description')}
-              </Text>
-            </CardBody>
-          </Card>
-
-          <Card as={RouterLink} to="/demo" _hover={{ shadow: 'lg', transform: 'translateY(-4px)' }} transition="all 0.2s">
-            <CardBody>
-              <Heading size="md" mb={2}>{t('pages:landing.cards.demo.title')}</Heading>
-              <Text fontSize="sm" color="gray.600">
-                {t('pages:landing.cards.demo.description')}
-              </Text>
-            </CardBody>
-          </Card>
-
-          <Card as={RouterLink} to="/architecture" _hover={{ shadow: 'lg', transform: 'translateY(-4px)' }} transition="all 0.2s">
-            <CardBody>
-              <Heading size="md" mb={2}>{t('pages:landing.cards.architecture.title')}</Heading>
-              <Text fontSize="sm" color="gray.600">
-                {t('pages:landing.cards.architecture.description')}
-              </Text>
-            </CardBody>
-          </Card>
-
-          <Card as={RouterLink} to="/results" _hover={{ shadow: 'lg', transform: 'translateY(-4px)' }} transition="all 0.2s">
-            <CardBody>
-              <Heading size="md" mb={2}>{t('pages:landing.cards.results.title')}</Heading>
-              <Text fontSize="sm" color="gray.600">
-                {t('pages:landing.cards.results.description')}
-              </Text>
-            </CardBody>
-          </Card>
+      {/* Quick Navigation Cards - SpaceX Minimal */}
+      <Section py={20}>
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={8}>
+          {[
+            { to: '/story', title: t('pages:landing.cards.story.title'), desc: t('pages:landing.cards.story.description') },
+            { to: '/demo', title: t('pages:landing.cards.demo.title'), desc: t('pages:landing.cards.demo.description') },
+            { to: '/architecture', title: t('pages:landing.cards.architecture.title'), desc: t('pages:landing.cards.architecture.description') },
+            { to: '/results', title: t('pages:landing.cards.results.title'), desc: t('pages:landing.cards.results.description') },
+          ].map((card) => (
+            <Card
+              key={card.to}
+              as={RouterLink}
+              to={card.to}
+              bg="spacex.darkGray"
+              borderWidth="1px"
+              borderColor="spacex.borderGray"
+              borderRadius="0"
+              transition="all 0.3s ease"
+              _hover={{
+                transform: 'translateY(-4px)',
+                borderColor: 'white',
+              }}
+            >
+              <CardBody>
+                <Heading size="md" mb={2} color="white">
+                  {card.title}
+                </Heading>
+                <Text fontSize="sm" color="spacex.textGray">
+                  {card.desc}
+                </Text>
+              </CardBody>
+            </Card>
+          ))}
         </SimpleGrid>
       </Section>
     </Box>

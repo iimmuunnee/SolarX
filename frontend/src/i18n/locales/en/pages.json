@@ -2,12 +2,14 @@
   "landing": {
     "hero": {
       "title": "SolarX: AI-Powered Battery Optimization",
-      "subtitle": "Compare LG, Samsung, and Tesla batteries for solar-powered humanoid robot charging stations using LSTM prediction and physics-informed models.",
+      "subtitle": "Compare Samsung, LG, and Tesla batteries for solar-powered humanoid robot charging stations<br/>using LSTM prediction and physics-informed models.",
       "metrics": {
         "vendors": "Vendors Compared",
         "soh": "Battery SOH",
         "roi": "ROI"
-      }
+      },
+      "titleLine1": "SolarX: AI-Powered",
+      "titleLine2": "Battery Optimization"
     },
     "cards": {
       "story": {

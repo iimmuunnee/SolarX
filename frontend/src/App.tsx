@@ -10,10 +10,11 @@ import { Story } from './pages/Story';
 import { Demo } from './pages/Demo';
 import { Architecture } from './pages/Architecture';
 import { Results } from './pages/Results';
+import { theme } from './theme';
 
 function App() {
   return (
-    <ChakraProvider>
+    <ChakraProvider theme={theme}>
       <Router>
         <Flex direction="column" minH="100vh">
           <Navbar />

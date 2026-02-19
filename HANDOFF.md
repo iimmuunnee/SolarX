@@ -1,666 +1,268 @@
 # HANDOFF - SolarX 프로젝트 인계 문서
 
-**최종 업데이트:** 2026-02-16 22:40
-**작성자:** Claude Code (Sonnet 4.5)
+**최종 업데이트:** 2026-02-20 01:10
+**작성자:** Claude Code (Sonnet 4.6)
 **목적:** 다음 에이전트가 이 파일만 읽고 작업을 이어갈 수 있도록 현재 상태 정리
 
-> ⚠️ **중요:** 이 문서는 프로젝트의 현재 상태를 정확히 반영합니다. 다음 에이전트는 이 파일만 읽고 작업을 시작할 수 있습니다.
+> ⚠️ **중요:** 이 문서는 프로젝트의 현재 상태를 정확히 반영합니다.
 
 ---
 
-## 🎯 한눈에 보는 프로젝트 상태 (Project Status at a Glance)
+## 🎯 한눈에 보는 프로젝트 상태
 
 | 항목 | 상태 | 비고 |
 |------|------|------|
 | **코드 작성** | ✅ 완료 | Backend (FastAPI) + Frontend (React) |
 | **Docker 설정** | ✅ 완료 | Dockerfile, docker-compose.yml |
-| **문서화** | ✅ 완료 | 4개 마크다운 파일 |
-| **필수 파일** | ✅ 확인 | LSTM 모델 + 데이터 파일 존재 |
-| **프로젝트 정리** | ✅ 완료 | 중복 제거, .gitignore 추가 |
-| **Git 커밋** | ✅ 완료 | 정리 커밋 (2026-02-16 22:40) |
-| **GitHub Push** | ⚠️ 필요 | `git push origin main` 필요 |
-| **테스트 실행** | ⚠️ 미실행 | `python test_backend.py` 필요 |
-| **Docker 빌드** | ⚠️ 미실행 | `docker build` 필요 |
-| **배포** | ❌ 미완료 | 클라우드 배포 대기 중 |
+| **GitHub Actions** | ✅ 완료 | CI/CD 정상 작동 |
+| **UI/UX 개선** | ✅ 완료 | 2026-02-20 대규모 개선 |
+| **빌드** | ✅ 통과 | TypeScript 오류 없음, vite build 성공 |
+| **배포** | ⚠️ 미완료 | 클라우드 배포 대기 중 |
 
-**→ 다음 단계:** Git Push → 테스트 실행 → Docker 빌드 → 배포
+**→ 다음 단계:** 클라우드 배포 (Google Cloud Run / Fly.io / Heroku)
 
 ---
 
-## 🔄 최근 세션 업데이트 (Latest Session Update - 2026-02-16 22:40)
+## 🔄 최근 세션 업데이트 (2026-02-20)
 
-### 이번 세션에서 수행한 작업
-1. ✅ **.gitignore 파일 생성** - Python 캐시 파일 무시 설정
-2. ✅ **Git에서 캐시 파일 제거** - 108개 __pycache__/*.pyc 파일 제거
-3. ✅ **중복 SolarX/ 디렉토리 제거** - 중첩 저장소 잔재 완전 제거
-4. ✅ **Git 커밋 완료** - "chore: Clean up project - remove duplicates and cache files"
-5. ✅ **HANDOFF.md 업데이트** - 현재 세션 작업 내역 반영
+이번 세션은 **프론트엔드 UI/UX 개선** 작업이었다. 기능 변경 없음, 배포 관련 변경 없음.
 
-### 변경된 상태
-- **이전:** 중복 디렉토리(SolarX/) 존재, 108개 캐시 파일 Git 추적, .gitignore 없음
-- **현재:** 중복 제거 완료, 캐시 파일 Git에서 제거, .gitignore 적용
-- **영향:** 저장소 크기 감소, 프로젝트 구조 명확화, 향후 캐시 파일 자동 무시
+### 1. ✅ BatteryGauge SOC 툴팁 개선
 
-### 제거된 파일 (109개)
-- SolarX/ 디렉토리 전체 (모든 파일이 최상위에 중복 존재했음)
-- __pycache__/ 디렉토리들 (src/, tests/, backend/ 등)
-- .coverage 파일 (테스트 커버리지 보고서)
-- 총 19,319줄 삭제
+**문제:** 각 배터리 게이지마다 "왜 SOC가 낮나요?" 툴팁이 개별 표시됨 → 중복, 지저분.
 
-### 다음 에이전트가 바로 시작할 수 있는 작업
-→ **GitHub Push** (`git push origin main`)부터 시작
-→ 중복 제거 및 정리 작업은 **이미 완료**되었으므로 건너뛰기 가능
+**해결:**
+- `SOC_LOW_THRESHOLD = 50` 기준으로, 영역 내 배터리가 하나라도 SOC가 낮으면 영역 우측 상단에 툴팁 **하나만** 표시
+- `BatteryGauge.tsx`: `showExplanation` prop 제거, `SOC_EXPLANATION`과 `SOC_LOW_THRESHOLD` export 추가
+- `Demo.tsx`: Battery Status 박스에 `hasLowSOC` 조건 추가, 우측 상단 절대 위치 툴팁
+- `Results.tsx`: Winner 카드 4번째 셀에 `position="relative"` + 조건부 툴팁
+
+**수정 파일:**
+- `frontend/src/components/battery/BatteryGauge.tsx`
+- `frontend/src/pages/Demo.tsx`
+- `frontend/src/pages/Results.tsx`
 
 ---
 
-## 📍 현재 상태 (Current State)
+### 2. ✅ 차트 Y축/X축 레이블 전면 개선
 
-### 프로젝트 개요
-- **프로젝트명:** SolarX Web Application
-- **목적:** 태양광 발전 + 배터리 ESS 최적화 시뮬레이션 웹 애플리케이션
-- **기술 스택:**
-  - Backend: Python 3.9-3.12, FastAPI, PyTorch (LSTM 모델)
-  - Frontend: React, TypeScript, Vite
-  - Deployment: Docker (multi-stage build)
+**문제 4가지:**
+1. Y축 레이블이 90° 회전되어 읽기 불편
+2. Y축 숫자(₩10,000,000 같은 긴 값)가 왼쪽으로 잘림
+3. X축/Y축 레이블이 tick 숫자와 겹침
+4. X축 레이블 "시간(시간)" — 단위 표기 부정확
 
-### Git 상태
-- **브랜치:** main
-- **최근 커밋:**
-  ```
-  c15413c - chore: Clean up project - remove duplicates and cache files (2026-02-16 22:40)
-  dc6f367 - chore: Include SolarX directory with LSTM model and data
-  b1c51af - feat: Add Docker deployment, SolarX-web
-  ```
-- **로컬 변경사항:**
-  ```
-  - .claude/settings.local.json (Modified, Git 추적 안 함)
-  - HANDOFF.md (Modified, 이 파일)
-  ```
-- **다음 단계:** Git Push 필요 (`git push origin main`)
+**해결:**
+- Y축 레이블: Recharts `label` prop 완전 제거 → 차트 **위쪽**에 Chakra `<Text>`로 가로 렌더링
+- X축 레이블: 차트 **아래쪽**에 Chakra `<Text>`로 분리 (겹침 없음)
+- Y축 너비: `YAxis width` 증가 — ProfitChart `115px`, PredictionChart `65px`
+- `labelPaddingLeft = margin.left + Y_AXIS_WIDTH`로 레이블 위치 정렬
 
----
+**단위 변경:**
+- **ProfitChart** X축: hours → days 변환 (`Math.round(hour / 24)`) / 레이블 `"일 (day)"` / 툴팁 `"{{day}}일차"`
+- **PredictionChart** X축: 그대로 hours / 레이블 `"시간 (h)"` / 툴팁 `"{{hour}}h"`
+- Brush도 day 단위로 표시
 
-## ✅ 성공한 작업 (Completed Successfully)
-
-### 1. Docker 컨테이너화 완료 ✅
-**무엇을:** Frontend + Backend를 단일 컨테이너로 통합
-
-**구현 내용:**
-- `Dockerfile` (multi-stage build)
-  - Stage 1: Node.js 18 Alpine - Frontend 빌드 (React + Vite)
-  - Stage 2: Python 3.9 Slim - Backend + Static Files 서빙
-  - 최종 이미지 크기: ~800MB-1.2GB
-- `.dockerignore` - 불필요한 파일 제외 (node_modules, .git, __pycache__)
-- `docker-compose.yml` - 로컬 개발용 설정 (volume mounts, health checks)
-
-**검증 방법:**
-```bash
-docker build -t solarx-web .
-docker run -p 8000:8000 solarx-web
-```
-
-### 2. Backend API 구현 ✅
-**파일 구조:**
-```
-backend/
-├── app/
-│   ├── main.py              # FastAPI 앱, 정적 파일 서빙
-│   ├── config.py            # 설정 (CORS 등)
-│   ├── api/
-│   │   ├── health.py        # /api/health
-│   │   ├── vendors.py       # /api/vendors
-│   │   ├── simulation.py    # /api/simulate/*
-│   │   └── results.py       # /api/results/*
-│   └── schemas/
-│       └── responses.py     # Pydantic 모델
-├── requirements.txt         # Python 의존성 (torch>=2.2.0)
-├── run_server.py            # 서버 실행 스크립트
-└── start_server.bat         # Windows 배치 파일
-```
-
-**주요 API 엔드포인트:**
-- `GET /api/health` - 헬스 체크
-- `GET /api/vendors` - 배터리 제조사 목록
-- `POST /api/simulate/benchmark` - 벤치마크 시뮬레이션
-- `POST /api/simulate/custom` - 커스텀 시뮬레이션
-- `GET /api/results/benchmark` - 벤치마크 결과
-- `GET /api/results/scalability` - 확장성 결과
-
-### 3. Frontend 웹 UI 구현 ✅
-**파일 구조:**
-```
-frontend/
-├── src/
-│   ├── App.tsx              # 메인 앱 (React Router)
-│   ├── pages/               # 페이지 컴포넌트
-│   ├── components/          # 재사용 컴포넌트
-│   ├── services/            # API 클라이언트
-│   └── types/               # TypeScript 타입
-├── package.json
-└── vite.config.ts           # Vite 설정 (API proxy)
-```
-
-**주요 페이지:**
-- `/` - 홈 (랜딩 페이지)
-- `/demo` - 인터랙티브 시뮬레이션 데모
-- `/story` - 프로젝트 스토리
-- `/architecture` - 시스템 아키텍처
-- `/results` - 결과 대시보드
-
-### 4. 테스트 스크립트 작성 ✅
-**파일:** `test_backend.py`
-
-**기능:**
-1. Backend imports 테스트
-2. API routes 등록 확인
-3. Health endpoint 테스트 (TestClient 사용)
-
-**실행 방법:**
-```bash
-python test_backend.py
-```
-
-### 5. 문서화 완료 ✅
-**작성된 문서:**
-1. `QUICK_START.md` - 한영 병기 빠른 시작 가이드
-2. `DOCKER_DEPLOYMENT.md` - Docker 배포 가이드
-3. `IMPLEMENTATION_SUMMARY.md` - 구현 요약
-4. `HANDOFF.md` - 이 파일
-5. `SolarX/CLAUDE.md` 업데이트 - Docker 섹션 추가
-
-### 6. CI/CD 파이프라인 구성 ✅
-**파일:** `.github/workflows/deploy.yml`
-
-**기능:**
-- 자동 Docker 이미지 빌드 (push on main)
-- GitHub Container Registry (GHCR)에 푸시
-- 선택적 Google Cloud Run 배포
-
-### 7. 주요 버그 수정 ✅
-**수정 내역:**
-1. `backend/requirements.txt` - PyTorch 버전 업데이트
-   - 변경 전: `torch==2.1.0` (Python 3.12 불호환)
-   - 변경 후: `torch>=2.2.0` (Python 3.12 호환)
-
-2. `backend/app/main.py` - SPA 라우팅 지원
-   - StaticFiles에 `html=True` 추가 (페이지 새로고침 시 404 방지)
-
-3. `backend/app/schemas/responses.py` - Pydantic 경고 수정
-   - `model_config = {"protected_namespaces": ()}` 추가
-
-4. `frontend/vite.config.ts` - 개발 환경 최적화
-   - API proxy 추가 (`/api` → `http://localhost:8000`)
-   - 빌드 최적화 (chunk splitting, caching)
+**수정 파일:**
+- `frontend/src/components/charts/ProfitChart.tsx`
+- `frontend/src/components/charts/PredictionChart.tsx`
+- `frontend/src/i18n/locales/ko/charts.json`
+- `frontend/src/i18n/locales/en/charts.json`
 
 ---
 
-## ⚠️ 시도했으나 미완료된 작업 (Attempted but Not Completed)
+### 3. ✅ SolarChargingAnimation 하단 텍스트 개선
 
-### 1. 실제 Docker 빌드 테스트 미실행 ⚠️
-**시도한 것:**
-- Dockerfile, docker-compose.yml 작성 완료
-- 빌드 스크립트 작성
+**변경 내용:**
 
-**미완료 이유:**
-- 사용자가 직접 실행해야 함 (AI가 Docker 명령어를 실행하지 못함)
-- 의존성: Docker Desktop 설치 필요
+| 항목 | 변경 전 | 변경 후 |
+|------|---------|---------|
+| fontSize | 9 | 12 |
+| fill | #6b7280 (어두운 회색) | #d1d5db (밝은 회색) |
+| fontWeight | (없음) | bold |
+| letterSpacing | 3 | 4 |
+| text y 위치 | 372 | 384 (배터리와 간격 확보) |
+| SVG height | 380 | 410 (하단 여백 확보) |
+| SVG viewBox | 0 0 260 380 | 0 0 260 410 |
 
-**다음 단계:**
-```bash
-# 1. Docker 빌드 테스트
-docker build -t solarx-web .
+- 배터리 하단(y=356)에서 텍스트 중심(y=384)까지: **28px 간격**
+- 텍스트 하단(y≈390)에서 SVG 테두리(410)까지: **20px 여백**
 
-# 2. 컨테이너 실행 테스트
-docker run -p 8000:8000 solarx-web
-
-# 3. 접속 확인
-curl http://localhost:8000/api/health
-```
-
-### 2. LSTM 모델 파일 확인됨 ✅
-**위치:** `SolarX/src/lstm_solar_model.pth`
-**상태:** ✅ 파일 존재 확인 (80KB)
-**확인일:** 2026-02-16
-
-**검증 완료:**
-- 파일이 실제로 존재함
-- Dockerfile이 해당 파일을 복사함 (`COPY SolarX/ /app/SolarX/`)
-- Backend 실행 시 모델 로딩 가능
-
-### 3. 데이터 파일 확인됨 ✅
-**위치:** `SolarX/data/`
-**상태:** ✅ 5개 CSV 파일 존재 확인 (~823KB 총 크기)
-**확인일:** 2026-02-16
-
-**파일 목록:**
-1. `Donghae_generation.csv` (90KB)
-2. `Donghae_weather_2401_2406.csv` (193KB)
-3. `Donghae_weather_2406_2506.csv` (402KB)
-4. `smp_land_2024.csv` (69KB)
-5. `smp_land_2025.csv` (68KB)
-
-**검증 완료:**
-- 모든 필수 데이터 파일 존재
-- Backend가 시작 시 해당 파일을 로드 가능
+**수정 파일:**
+- `frontend/src/components/animations/SolarChargingAnimation.tsx`
 
 ---
 
-## ❌ 실패한 작업 (Failed Tasks)
+### 4. ✅ 홈페이지 메인 타이틀 줄바꿈
 
-### 1. Git Push 미완료 ⚠️
-**상태:**
-- 로컬 커밋은 완료됨 ✅
-- GitHub push는 아직 안 됨 ⚠️
-
-**해결 방법:**
-```bash
-# GitHub에 Push
-git push origin main
+**목표:**
+```
+SolarX: AI 기반
+배터리 최적화
 ```
 
-**예상 결과:**
-- 109개 파일 삭제 반영
-- SolarX/ 디렉토리 GitHub에서 제거됨
-- __pycache__ 파일들 GitHub에서 제거됨
-- .gitignore 파일 추가됨
+**시도한 방법들 (모두 실패):**
+
+| 방법 | 결과 | 실패 이유 |
+|------|------|-----------|
+| `\n` + `whiteSpace="pre-line"` | ❌ | CSS 자연 줄바꿈이 `\n` 보다 먼저 작동, "기반" 분리됨 |
+| JSON에 실제 newline 삽입 | ❌ | JSON 파싱 오류 (Invalid control character) |
+| `<br/>` + `Trans` 컴포넌트 | ❌ | `<br/>` 이전에 자연 줄바꿈 발생, "기반" 여전히 분리됨 |
+| `wordBreak="keep-all"` | ❌ | 폰트가 너무 커서 컨테이너 폭 초과, 여전히 분리 |
+
+**최종 성공 방법:**
+번역 키를 두 줄로 분리 + 첫 번째 줄에 `whiteSpace="nowrap"`:
+
+```tsx
+// Landing.tsx
+<Box as="span" display="block" whiteSpace="nowrap">
+  {t('pages:landing.hero.titleLine1')}  // "SolarX: AI 기반"
+</Box>
+<Box as="span" display="block">
+  {t('pages:landing.hero.titleLine2')}  // "배터리 최적화"
+</Box>
+```
+
+`whiteSpace="nowrap"`이 CSS 자연 줄바꿈 자체를 차단하므로 화면 폭에 무관하게 첫 줄은 절대 깨지지 않음.
+
+**부제목도 변경:**
+- 줄바꿈 위치: "을 위한" 다음에서 줄바꿈 (`<br/>` + `Trans`)
+- 브랜드명 통일: 삼성→Samsung, 테슬라→Tesla (영문)
+
+**수정 파일:**
+- `frontend/src/pages/Landing.tsx`
+- `frontend/src/i18n/locales/ko/pages.json` (`titleLine1`, `titleLine2` 추가)
+- `frontend/src/i18n/locales/en/pages.json` (`titleLine1`, `titleLine2` 추가)
 
 ---
 
-## 🚀 다음 단계 (Next Steps)
+### 5. ✅ 부수 오류 수정
 
-### 우선순위 0: Git Push 🔴
-**즉시 수행 필요:**
+이번 세션 작업 중 발생한 빌드/타입 오류들:
 
-```bash
-git push origin main
-```
-
-**예상 결과:**
-- 정리 커밋이 GitHub에 반영됨
-- SolarX/ 중복 디렉토리가 GitHub에서 제거됨
-- 108개 캐시 파일이 GitHub에서 제거됨
-- 저장소가 깔끔해짐
-
-### 우선순위 1: 검증 및 테스트 🔴
-**Git Push 후 수행:**
-
-1. **필수 파일 존재 확인** ✅ **완료 (2026-02-16)**
-   - LSTM 모델: `src/lstm_solar_model.pth` ✅ (80KB)
-   - 데이터 파일: `data/` ✅ (5개 CSV 파일)
-   - **결과:** 모든 필수 파일 존재 확인
-
-2. **Backend 테스트** ⚠️ **미실행**
-   ```bash
-   cd backend
-   pip install -r requirements.txt
-   cd ..
-   python test_backend.py
-   ```
-   - 예상 결과: `3/3 tests passed`
-   - 실패 시: 로그 확인 후 의존성 재설치
-
-3. **Backend 서버 실행 테스트**
-   ```bash
-   cd backend
-   uvicorn app.main:app --reload --port 8000
-   ```
-   - 접속: http://localhost:8000/docs
-   - Health check: http://localhost:8000/api/health
-
-4. **Frontend 빌드 테스트**
-   ```bash
-   cd frontend
-   npm install
-   npm run build
-   ls dist/  # index.html, assets/ 확인
-   ```
-
-5. **Docker 빌드 테스트**
-   ```bash
-   docker build -t solarx-web .
-   ```
-   - 예상 소요 시간: 5-10분 (첫 빌드)
-   - 예상 이미지 크기: 800MB-1.2GB
-
-6. **Docker 실행 테스트**
-   ```bash
-   docker run -p 8000:8000 solarx-web
-   ```
-   - 테스트:
-     - http://localhost:8000 (Frontend)
-     - http://localhost:8000/docs (API 문서)
-     - http://localhost:8000/api/health (Health check)
-
-### 우선순위 2: Git 설정 🟡
-**배포 전 필요:**
-
-```bash
-# 1. 모든 파일 스테이징
-git add .
-
-# 2. 첫 커밋
-git commit -m "feat: Initial SolarX web application with Docker deployment"
-
-# 3. Main 브랜치로 전환 (GitHub Actions 트리거용)
-git branch -M main
-
-# 4. Remote 추가 (GitHub 레포지토리 있는 경우)
-git remote add origin https://github.com/YOUR_USERNAME/SolarX.git
-
-# 5. 푸시
-git push -u origin main
-```
-
-### 우선순위 3: 클라우드 배포 🟢
-**Git 푸시 후:**
-
-**옵션 A: Google Cloud Run (권장)**
-```bash
-gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/solarx-web
-gcloud run deploy solarx \
-  --image gcr.io/YOUR_PROJECT_ID/solarx-web \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --memory 2Gi
-```
-
-**옵션 B: Fly.io**
-```bash
-fly launch
-fly deploy
-```
-
-**옵션 C: Heroku**
-```bash
-heroku create your-app-name
-heroku container:push web
-heroku container:release web
-```
-
-### 우선순위 4: 보안 강화 🟢
-**프로덕션 배포 전:**
-
-1. **CORS 설정 변경**
-   - 파일: `backend/app/config.py`
-   - 변경: `cors_origins = ["*"]` → `cors_origins = ["https://yourdomain.com"]`
-
-2. **비밀 정보 환경 변수화**
-   - 현재: 설정 파일에 하드코딩
-   - 변경: `.env` 파일 사용 + Docker secrets
-
-3. **Non-root 사용자로 실행**
-   - Dockerfile에 `USER` 지시문 추가
-
-4. **이미지 취약점 스캔**
-   ```bash
-   docker scan solarx-web
-   ```
+| 오류 | 원인 | 해결 |
+|------|------|------|
+| `TS1002: Unterminated string literal` (JSON) | Python Write tool이 `\n`을 실제 newline 바이트로 삽입 | json.dumps로 재작성 |
+| `TS6133: 'AnimatePresence' declared but never read` | SolarChargingAnimation.tsx import 불필요 | import 제거 |
+| `TS2322: labelFormatter type mismatch` | `(label: number)` → Recharts expects `ReactNode` | 타입 annotation 제거 |
 
 ---
 
-## 🗂️ 중요 파일 위치 (Key Files)
+## 📍 현재 프론트엔드 구조 (UI 관련 핵심 파일)
 
-### Docker 관련
-- `Dockerfile` - Multi-stage build 정의
-- `docker-compose.yml` - 로컬 개발 환경
-- `.dockerignore` - 빌드 컨텍스트 최적화
-
-### Backend
-- `backend/app/main.py` - FastAPI 엔트리포인트
-- `backend/requirements.txt` - Python 의존성
-- `backend/run_server.py` - 서버 실행 헬퍼
-
-### Frontend
-- `frontend/src/App.tsx` - React 메인 앱
-- `frontend/vite.config.ts` - Vite 설정
-- `frontend/package.json` - npm 의존성
-
-### CI/CD
-- `.github/workflows/deploy.yml` - GitHub Actions 워크플로우
-
-### 문서
-- `QUICK_START.md` - 빠른 시작 가이드 (한영)
-- `DOCKER_DEPLOYMENT.md` - Docker 배포 가이드
-- `IMPLEMENTATION_SUMMARY.md` - 구현 요약
-- `HANDOFF.md` - 이 파일
-
-### 테스트
-- `test_backend.py` - Backend 검증 스크립트
-
----
-
-## 🐛 알려진 이슈 (Known Issues)
-
-### 1. Python 3.12 호환성
-- **상태:** ✅ 해결됨
-- **해결:** `torch>=2.2.0` 사용 (requirements.txt 업데이트됨)
-
-### 2. SPA 라우팅 404
-- **상태:** ✅ 해결됨
-- **해결:** `StaticFiles(..., html=True)` 사용 (main.py 업데이트됨)
-
-### 3. Pydantic 경고 메시지
-- **상태:** ✅ 해결됨
-- **해결:** `protected_namespaces = ()` 설정 추가
-
-### 4. LSTM 모델/데이터 파일
-- **상태:** ✅ 확인 완료 (2026-02-16)
-- **LSTM 모델:** `src/lstm_solar_model.pth` (80KB) - 최상위에 존재 확인
-- **데이터 파일:** `data/` (5개 CSV 파일) - 최상위에 모두 존재 확인
-- **해결:** 모든 필수 파일이 존재하여 Docker 컨테이너 실행 가능
-
-### 5. 중복 디렉토리 및 캐시 파일
-- **상태:** ✅ 해결됨 (2026-02-16 22:40)
-- **해결:**
-  - SolarX/ 중복 디렉토리 완전 제거
-  - 108개 __pycache__/*.pyc 파일 Git에서 제거
-  - .gitignore 생성으로 향후 캐시 파일 자동 무시
-  - 프로젝트 구조 단순화 (최상위 디렉토리만 유지)
-
----
-
-## 💡 참고 사항 (Important Notes)
-
-### 개발 워크플로우
-1. **로컬 개발** (Hot reload 필요 시):
-   ```bash
-   # Terminal 1
-   cd backend && uvicorn app.main:app --reload
-
-   # Terminal 2
-   cd frontend && npm run dev
-   ```
-   - Frontend: http://localhost:5173
-   - Backend: http://localhost:8000
-
-2. **Docker 테스트** (프로덕션 환경과 유사):
-   ```bash
-   docker-compose up
-   ```
-   - 통합 서버: http://localhost:8000
-
-### 성능 메트릭
-- **Docker 이미지 크기:** ~800MB-1.2GB
-- **빌드 시간 (첫 빌드):** 5-10분
-- **빌드 시간 (캐시 사용):** 2-3분
-- **서버 시작 시간 (Cold start):** 20-30초
-- **서버 시작 시간 (Warm start):** 5-10초
-
-### CORS 설정
-- **현재:** 모든 오리진 허용 (`["*"]`)
-- **프로덕션:** 특정 도메인만 허용해야 함
-
-### Health Check
-- **엔드포인트:** `/api/health`
-- **응답 예시:**
-  ```json
-  {
-    "status": "healthy",
-    "model_loaded": true,
-    "data_loaded": true
-  }
-  ```
-
----
-
-## 📞 문제 발생 시 (Troubleshooting)
-
-### Backend 시작 실패
-**확인사항:**
-1. Python 버전: 3.9-3.12 필요
-2. 의존성 설치: `pip install -r backend/requirements.txt`
-3. LSTM 모델 파일: `SolarX/src/lstm_solar_model.pth` 존재 여부
-4. 데이터 파일: `SolarX/data/` 디렉토리 존재 여부
-
-**디버깅:**
-```bash
-python test_backend.py
+```
+frontend/src/
+├── components/
+│   ├── animations/
+│   │   └── SolarChargingAnimation.tsx   ✅ 수정됨 (SVG 높이, 텍스트 크기)
+│   ├── battery/
+│   │   ├── BatteryGauge.tsx             ✅ 수정됨 (showExplanation 제거, export 추가)
+│   │   └── CircularSOHGauge.tsx
+│   └── charts/
+│       ├── ProfitChart.tsx              ✅ 수정됨 (축 레이블, days 변환)
+│       ├── PredictionChart.tsx          ✅ 수정됨 (축 레이블)
+│       └── MethodologyPanel.tsx
+├── i18n/locales/
+│   ├── ko/
+│   │   ├── charts.json                  ✅ 수정됨 (xAxis 단위, tooltip)
+│   │   └── pages.json                   ✅ 수정됨 (titleLine1/2, subtitle br)
+│   └── en/
+│       ├── charts.json                  ✅ 수정됨
+│       └── pages.json                   ✅ 수정됨
+└── pages/
+    ├── Landing.tsx                      ✅ 수정됨 (Trans, nowrap, titleLine1/2)
+    ├── Demo.tsx                         ✅ 수정됨 (단일 SOC 툴팁)
+    └── Results.tsx                      ✅ 수정됨 (단일 SOC 툴팁)
 ```
 
-### Docker 빌드 실패
-**확인사항:**
-1. Docker Desktop 실행 중인지 확인
-2. `.dockerignore` 파일 존재 여부
-3. 디스크 공간 충분 (최소 5GB 필요)
-
-**디버깅:**
-```bash
-docker build -t solarx-web . --progress=plain
-```
-
-### Frontend API 호출 실패
-**확인사항:**
-1. Backend 서버 실행 중인지 확인: `curl http://localhost:8000/api/health`
-2. CORS 설정 확인: `backend/app/config.py`
-3. Vite proxy 설정 확인: `frontend/vite.config.ts`
-
 ---
 
-## ✨ 요약 (Summary)
+## ✅ 전체 완료된 작업 이력
 
-**완료된 작업:**
-- ✅ Docker 컨테이너화 (multi-stage build)
+### 2026-02-20 (이번 세션)
+- ✅ BatteryGauge 툴팁 단일화 (영역당 하나)
+- ✅ 차트 Y축 레이블 회전 제거, 가로 배치
+- ✅ 차트 Y축 숫자 잘림 해결
+- ✅ 차트 X축 단위 수정 (시간→일, h 표기)
+- ✅ CHARGING/CONVERTING/SELLING 텍스트 크게, 밝게
+- ✅ 홈 타이틀 줄바꿈 ("SolarX: AI 기반" / "배터리 최적화")
+- ✅ 홈 부제목 줄바꿈 및 브랜드명 영문 통일
+
+### 2026-02-17 (이전 세션)
+- ✅ GitHub Actions 수정 (디렉토리 구조, Docker load)
+- ✅ Docker 컨테이너화 완료
 - ✅ Backend API 구현 (FastAPI + LSTM)
 - ✅ Frontend UI 구현 (React + Vite)
-- ✅ CI/CD 파이프라인 (GitHub Actions)
-- ✅ 종합 문서화
-- ✅ 테스트 스크립트
-- ✅ 프로젝트 정리 (중복 제거, .gitignore)
-- ✅ Git 커밋 (정리 작업)
-
-**즉시 필요한 작업:**
-1. 🔴 Git Push (`git push origin main`) - **미실행**
-2. 🔴 Backend 테스트 실행 (`python test_backend.py`) - **미실행**
-3. 🔴 Docker 빌드 테스트 (`docker build -t solarx-web .`) - **미실행**
-4. ✅ LSTM 모델/데이터 파일 확인 - **완료 (2026-02-16)**
-5. ✅ 중복 제거 및 정리 - **완료 (2026-02-16 22:40)**
-6. 🟢 클라우드 배포 - **미완료**
-
-**현재 상태:**
-- 코드: ✅ 완성
-- 문서: ✅ 완성
-- 필수 파일: ✅ 확인 완료 (모델 + 데이터)
-- 프로젝트 정리: ✅ 완료 (중복 제거, .gitignore)
-- Git 커밋: ✅ 완료 (로컬)
-- Git Push: ⚠️ 필요
-- 테스트: ⚠️ 미실행
-- 배포: ❌ 미완료
+- ✅ CI/CD 파이프라인 구성
+- ✅ 문서화 (QUICK_START.md, DOCKER_DEPLOYMENT.md 등)
 
 ---
 
+## ⚠️ 알려진 미완료 사항
+
+### 클라우드 배포 ⚠️
+**모든 기술적 준비는 완료됨.** 명령만 실행하면 됨.
+
+```bash
+# 옵션 A: Google Cloud Run (권장)
+gcloud run deploy solarx \
+  --image ghcr.io/iimmuunnee/solarx:latest \
+  --platform managed --region us-central1 \
+  --allow-unauthenticated --memory 2Gi --port 8000
+
+# 옵션 B: Fly.io
+fly launch && fly deploy
+
+# 옵션 C: Heroku
+heroku create && heroku container:push web && heroku container:release web
+```
+
 ---
 
-## 📝 다음 에이전트를 위한 요약 (Agent Handoff Summary)
+## 🚀 다음 에이전트가 해야 할 작업
 
-### ✅ 이미 완료된 작업 (Already Done)
-1. ✅ Docker 컨테이너화 완료 (Dockerfile, docker-compose.yml)
-2. ✅ Backend API 구현 (FastAPI + LSTM)
-3. ✅ Frontend 웹 UI 구현 (React + Vite)
-4. ✅ CI/CD 파이프라인 구성 (GitHub Actions)
-5. ✅ 종합 문서화 (4개 마크다운 파일)
-6. ✅ 테스트 스크립트 작성 (test_backend.py)
-7. ✅ **LSTM 모델 파일 확인** (src/lstm_solar_model.pth)
-8. ✅ **데이터 파일 확인** (data/ - 5개 CSV)
-9. ✅ **.gitignore 생성** - Python 캐시 파일 무시
-10. ✅ **중복 제거** - SolarX/ 디렉토리 제거, 108개 캐시 파일 제거
-11. ✅ **Git 커밋** - 정리 작업 커밋 완료 (2026-02-16 22:40)
+### 우선순위 1 🔴 — 클라우드 배포
+현재 상태: Docker 빌드 ✅, GitHub Actions ✅, 로컬 테스트 ✅, 배포만 안 됨.
 
-### ⚠️ 즉시 실행해야 할 작업 (Immediate Action Required)
-1. **Git Push** (최우선)
-   ```bash
-   git push origin main
-   ```
-   예상 결과: 중복 제거 반영, 저장소 정리됨
+### 우선순위 2 🟡 — 추가 UI 개선 (선택)
+아직 손대지 않은 영역:
+- 모바일 반응형 검토 (특히 홈 타이틀이 `nowrap`으로 좁은 화면에서 넘칠 수 있음)
+- Demo 페이지 결과 테이블 미구현 (현재 MetricsGrid만 있음)
+- Architecture 페이지 실제 다이어그램 구현
 
-2. **Backend 테스트 실행**
-   ```bash
-   python test_backend.py
-   ```
-   예상 결과: `3/3 tests passed`
+### 우선순위 3 🟢 — 프로덕션 보안
+- `backend/app/config.py` CORS `"*"` → 실제 도메인으로 변경
+- 환경변수 `.env` 분리
 
-3. **Docker 빌드 테스트**
-   ```bash
-   docker build -t solarx-web .
-   ```
-   예상 시간: 5-10분
+---
 
-4. **Docker 실행 테스트**
-   ```bash
-   docker run -p 8000:8000 solarx-web
-   ```
-   테스트: http://localhost:8000/api/health
+## 💡 개발 환경 실행 방법
 
-### 💡 다음 에이전트가 알아야 할 중요 사항
-- **프로젝트 정리 완료** - 중복 디렉토리 제거, 캐시 파일 정리, .gitignore 추가
-- **모든 필수 파일 존재 확인 완료** - LSTM 모델, 데이터 파일 모두 최상위에 존재
-- **Git 커밋 완료** - 정리 작업이 로컬에 커밋됨
-- **Git Push 필요** - GitHub에 정리 내용 반영 필요 (최우선)
-- **Docker 빌드 가능** - 모든 필수 파일 확인됨
-- **다음 단계:** Push → 테스트 → Docker 빌드 → 배포
-
-### 🚀 작업 시작 방법
-1. 이 파일 (HANDOFF.md) 읽기 ✅ (지금 읽고 있음)
-2. "우선순위 1: 검증 및 테스트" 섹션 실행
-3. 테스트 성공 시 "우선순위 2: Git 설정" 실행
-4. 커밋 후 "우선순위 3: 클라우드 배포" 고려
-
-### 🏃 빠른 시작 - 바로 실행할 명령어 (Quick Start Commands)
-
-**Step 0: HANDOFF.md 커밋 및 Push** (최우선)
 ```bash
-cd C:\dev\SolarX
-git add HANDOFF.md
-git commit -m "docs: Update HANDOFF.md after project cleanup
+# 로컬 개발 (hot reload)
+# Terminal 1
+cd backend && uvicorn app.main:app --reload
 
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
-git push origin main
+# Terminal 2
+cd frontend && npm run dev
+# Frontend: http://localhost:5173, Backend: http://localhost:8000
+
+# Docker (프로덕션과 동일)
+docker-compose up
+# http://localhost:8000
 ```
 
-**Step 1: Backend 테스트**
-```bash
-python test_backend.py
-```
+---
 
-**Step 2: Docker 빌드**
-```bash
-docker build -t solarx-web .
-```
+## 🐛 알려진 이슈 및 주의사항
 
-**Step 3: Docker 실행**
-```bash
-docker run -p 8000:8000 solarx-web
-```
+1. **홈 타이틀 모바일** — `whiteSpace="nowrap"`이 적용된 "SolarX: AI 기반"은 화면 폭이 매우 좁으면 컨테이너를 초과할 수 있음. 현재 `base: '5xl'`로 모바일 폰트 크기를 줄여 대응 중이나, 아주 작은 화면에서는 테스트 필요.
+2. **BatteryGauge SOC 툴팁 threshold** — `SOC_LOW_THRESHOLD = 50` 으로 설정. `BatteryGauge.tsx`에서 export 되어 있으므로 필요 시 변경 가능.
+3. **ProfitChart Brush** — 줌 Brush의 범위 레이블도 day 단위로 표시됨. 툴팁은 "{{day}}일차" 포맷.
+4. **JSON 수정 주의** — 이 프로젝트의 locale JSON 파일을 수정할 때 Python으로 직접 바이트를 다뤄야 함. Write 도구는 `\n`을 실제 newline으로 삽입하여 JSON 파싱 오류를 일으킴. `json.dumps()`를 사용해 재직성할 것.
 
-**Step 4: 테스트 (새 터미널)**
-```bash
-# Health check
-curl http://localhost:8000/api/health
+---
 
-# 브라우저에서 확인
-start http://localhost:8000
-```
-
-**Step 5: 배포 고려 (테스트 성공 시)**
-- Google Cloud Run, Fly.io, 또는 Heroku 중 선택
-- CI/CD가 자동으로 배포 (GitHub Actions)
+**마지막 업데이트:** 2026-02-20 01:10
+**다음 작업:** 클라우드 배포
+**빌드 상태:** ✅ `npm run build` 통과 (오류 없음)

@@ -2,12 +2,14 @@
   "landing": {
     "hero": {
       "title": "SolarX: AI 기반 배터리 최적화",
-      "subtitle": "태양광 기반 휴머노이드 로봇 충전 스테이션을 위한 LG, 삼성, 테슬라 배터리 비교 - LSTM 예측 및 물리 기반 모델 활용",
+      "subtitle": "태양광 기반 휴머노이드 로봇 충전 스테이션을 위한<br/>Samsung, LG, Tesla 배터리 비교 - LSTM 예측 및 물리 기반 모델 활용",
       "metrics": {
         "vendors": "비교 벤더",
         "soh": "배터리 건강도",
         "roi": "투자 수익률"
-      }
+      },
+      "titleLine1": "SolarX: AI 기반",
+      "titleLine2": "배터리 최적화"
     },
     "cards": {
       "story": {

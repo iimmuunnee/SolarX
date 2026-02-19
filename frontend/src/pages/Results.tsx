@@ -8,6 +8,7 @@ import {
   Alert,
   AlertIcon,
   VStack,
+  HStack,
   Box,
   SimpleGrid,
   Card,
@@ -21,6 +22,7 @@ import {
   Badge,
   Skeleton,
   SkeletonText,
+  Tooltip,
 } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import { Section } from '../components/layout/Section';
@@ -28,6 +30,8 @@ import { usePrecomputed } from '../hooks/usePrecomputed';
 import { ProfitChart } from '../components/charts/ProfitChart';
 import { PredictionChart } from '../components/charts/PredictionChart';
 import { MetricsGrid } from '../components/charts/MetricsGrid';
+import { BatteryGauge, SOC_EXPLANATION, SOC_LOW_THRESHOLD } from '../components/battery/BatteryGauge';
+import { CircularSOHGauge } from '../components/battery/CircularSOHGauge';
 import { formatKRW, formatPercent, formatNumber } from '../utils/formatters';
 
 export const Results = () => {
@@ -74,35 +78,115 @@ export const Results = () => {
     current.revenue_krw > prev.revenue_krw ? current : prev
   );
 
+  const winnerSOCLow = winner.avg_soc_percent < SOC_LOW_THRESHOLD;
+
   return (
     <Box>
-      {/* Winner Announcement */}
-      <Section bg="blue.50">
-        <Card bg="blue.500" color="white" size="lg">
+      {/* Winner Announcement - SpaceX Minimal Style */}
+      <Section>
+        <Card
+          bg="spacex.darkGray"
+          color="white"
+          size="lg"
+          borderWidth="1px"
+          borderColor="white"
+          borderRadius="0"
+        >
           <CardBody>
-            <VStack spacing={4} align="center">
-              <Badge colorScheme="yellow" fontSize="lg" px={4} py={2}>
+            <VStack spacing={6} align="center">
+              <Badge
+                bg="white"
+                color="black"
+                fontSize="md"
+                px={6}
+                py={2}
+                borderRadius="0"
+                textTransform="uppercase"
+                fontWeight="bold"
+                letterSpacing="widest"
+              >
                 {t('pages:results.winner.badge')}
               </Badge>
-              <Heading size="xl">{winner.vendor_name}</Heading>
-              <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8} w="full" textAlign="center">
+              <Heading size="2xl" fontWeight="800" color="white">
+                {winner.vendor_name}
+              </Heading>
+
+              <SimpleGrid columns={{ base: 1, md: 4 }} spacing={8} w="full" textAlign="center">
                 <Box>
-                  <Text fontSize="3xl" fontWeight="bold">
+                  <Text fontSize="3xl" fontWeight="bold" color="white">
                     {formatKRW(winner.revenue_krw, 0)}
                   </Text>
-                  <Text fontSize="sm">{t('pages:results.winner.totalRevenue')}</Text>
+                  <Text
+                    fontSize="xs"
+                    color="spacex.textGray"
+                    textTransform="uppercase"
+                    letterSpacing="wider"
+                  >
+                    {t('pages:results.winner.totalRevenue')}
+                  </Text>
                 </Box>
                 <Box>
-                  <Text fontSize="3xl" fontWeight="bold">
+                  <Text fontSize="3xl" fontWeight="bold" color="white">
                     {formatPercent(winner.soh_percent, 2)}
                   </Text>
-                  <Text fontSize="sm">{t('pages:results.winner.stateOfHealth')}</Text>
+                  <Text
+                    fontSize="xs"
+                    color="spacex.textGray"
+                    textTransform="uppercase"
+                    letterSpacing="wider"
+                  >
+                    {t('pages:results.winner.stateOfHealth')}
+                  </Text>
                 </Box>
                 <Box>
-                  <Text fontSize="3xl" fontWeight="bold">
+                  <Text fontSize="3xl" fontWeight="bold" color="white">
                     {formatPercent(winner.roi_percent, 0)}
                   </Text>
-                  <Text fontSize="sm">{t('pages:results.winner.roi')}</Text>
+                  <Text
+                    fontSize="xs"
+                    color="spacex.textGray"
+                    textTransform="uppercase"
+                    letterSpacing="wider"
+                  >
+                    {t('pages:results.winner.roi')}
+                  </Text>
+                </Box>
+                <Box position="relative">
+                  {/* Single SOC tooltip — shown only when winner SOC is low */}
+                  {winnerSOCLow && (
+                    <Tooltip
+                      label={SOC_EXPLANATION}
+                      placement="top-end"
+                      hasArrow
+                      bg="gray.700"
+                      color="white"
+                      fontSize="xs"
+                      maxW="260px"
+                      p={3}
+                      borderRadius="md"
+                      textAlign="left"
+                    >
+                      <Text
+                        position="absolute"
+                        top={0}
+                        right={0}
+                        fontSize="2xs"
+                        color="spacex.textGray"
+                        textTransform="uppercase"
+                        letterSpacing="wide"
+                        cursor="help"
+                        borderBottom="1px dotted"
+                        borderBottomColor="spacex.textGray"
+                        _hover={{ color: 'white', borderBottomColor: 'white' }}
+                      >
+                        왜 SOC가 낮나요?
+                      </Text>
+                    </Tooltip>
+                  )}
+                  <HStack spacing={6} justify="center" pt={winnerSOCLow ? 5 : 0}>
+                    <BatteryGauge soc={winner.avg_soc_percent} width="70px" height="140px" />
+                    <CircularSOHGauge soh={winner.soh_percent} size={100} />
+                  </HStack>
                 </Box>
               </SimpleGrid>
             </VStack>
@@ -126,47 +210,78 @@ export const Results = () => {
         </VStack>
       </Section>
 
-      {/* Vendor Comparison Table */}
+      {/* Vendor Comparison Table - SpaceX Minimal */}
       <Section>
-        <Heading size="lg" mb={6}>
+        <Heading size="lg" mb={6} color="white">
           {t('pages:results.vendorComparison')}
         </Heading>
-        <Box overflowX="auto">
+        <Box
+          overflowX="auto"
+          borderWidth="1px"
+          borderColor="spacex.borderGray"
+          borderRadius="0"
+          bg="spacex.darkGray"
+        >
           <Table variant="simple">
             <Thead>
-              <Tr>
-                <Th>{t('pages:results.table.vendor')}</Th>
-                <Th isNumeric>{t('pages:results.table.revenue')}</Th>
-                <Th isNumeric>{t('pages:results.table.soh')}</Th>
-                <Th isNumeric>{t('pages:results.table.cycles')}</Th>
-                <Th isNumeric>{t('pages:results.table.roi')}</Th>
-                <Th isNumeric>{t('pages:results.table.payback')}</Th>
-                <Th isNumeric>{t('pages:results.table.npv')}</Th>
+              <Tr borderBottom="2px solid" borderColor="white">
+                <Th color="white" textTransform="uppercase">
+                  {t('pages:results.table.vendor')}
+                </Th>
+                <Th color="white" isNumeric textTransform="uppercase">
+                  {t('pages:results.table.revenue')}
+                </Th>
+                <Th color="white" isNumeric textTransform="uppercase">
+                  {t('pages:results.table.soh')}
+                </Th>
+                <Th color="white" isNumeric textTransform="uppercase">
+                  {t('pages:results.table.cycles')}
+                </Th>
+                <Th color="white" isNumeric textTransform="uppercase">
+                  {t('pages:results.table.roi')}
+                </Th>
+                <Th color="white" isNumeric textTransform="uppercase">
+                  {t('pages:results.table.payback')}
+                </Th>
+                <Th color="white" isNumeric textTransform="uppercase">
+                  {t('pages:results.table.npv')}
+                </Th>
               </Tr>
             </Thead>
             <Tbody>
               {data.vendors.map((vendor) => (
-                <Tr key={vendor.vendor_id} bg={vendor.vendor_id === winner.vendor_id ? 'blue.50' : undefined}>
-                  <Td fontWeight={vendor.vendor_id === winner.vendor_id ? 'bold' : 'normal'}>
+                <Tr
+                  key={vendor.vendor_id}
+                  bg={vendor.vendor_id === winner.vendor_id ? 'rgba(0, 217, 255, 0.05)' : undefined}
+                  borderBottom="1px solid"
+                  borderColor="gray.700"
+                  _hover={{
+                    bg: 'rgba(0, 217, 255, 0.1)',
+                    transition: 'background 0.3s ease',
+                  }}
+                >
+                  <Td fontWeight={vendor.vendor_id === winner.vendor_id ? 'bold' : 'normal'} color="gray.200">
                     {vendor.vendor_name}
                     {vendor.vendor_id === winner.vendor_id && (
-                      <Badge ml={2} colorScheme="blue">
+                      <Badge ml={2} bg="white" color="black" boxShadow="0 0 8px rgba(255, 215, 0, 0.5)">
                         {t('pages:results.table.best')}
                       </Badge>
                     )}
                   </Td>
-                  <Td isNumeric>{formatKRW(vendor.revenue_krw, 0)}</Td>
-                  <Td isNumeric>{formatPercent(vendor.soh_percent, 2)}</Td>
-                  <Td isNumeric>{formatNumber(vendor.cycle_count, 1)}</Td>
-                  <Td isNumeric>{formatPercent(vendor.roi_percent, 0)}</Td>
-                  <Td isNumeric>{formatNumber(vendor.payback_years, 1)} {t('pages:results.table.years')}</Td>
-                  <Td isNumeric>{formatKRW(vendor.npv_krw, 0)}</Td>
+                  <Td isNumeric color="gray.300">{formatKRW(vendor.revenue_krw, 0)}</Td>
+                  <Td isNumeric color="gray.300">{formatPercent(vendor.soh_percent, 2)}</Td>
+                  <Td isNumeric color="gray.300">{formatNumber(vendor.cycle_count, 1)}</Td>
+                  <Td isNumeric color="gray.300">{formatPercent(vendor.roi_percent, 0)}</Td>
+                  <Td isNumeric color="gray.300">
+                    {formatNumber(vendor.payback_years, 1)} {t('pages:results.table.years')}
+                  </Td>
+                  <Td isNumeric color="gray.300">{formatKRW(vendor.npv_krw, 0)}</Td>
                 </Tr>
               ))}
-              <Tr bg="gray.100" fontWeight="bold">
-                <Td>{t('pages:results.table.baseline')}</Td>
-                <Td isNumeric>{formatKRW(data.baseline.revenue_krw, 0)}</Td>
-                <Td isNumeric colSpan={5}>
+              <Tr bg="rgba(0, 102, 255, 0.1)" fontWeight="bold" borderTop="2px solid" borderColor="white">
+                <Td color="gray.200">{t('pages:results.table.baseline')}</Td>
+                <Td isNumeric color="gray.300">{formatKRW(data.baseline.revenue_krw, 0)}</Td>
+                <Td isNumeric colSpan={5} color="gray.500">
                   -
                 </Td>
               </Tr>

@@ -1,11 +1,36 @@
+/**
+ * SolarX SpaceX-inspired Minimal Dark Global Styles
+ */
+
+/* Google Fonts Import - Clean sans-serif */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap');
+
+/* CSS Variables - Minimal Grayscale */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* SpaceX Colors */
+  --spacex-black: #111827;
+  --spacex-dark-gray: #1c2536;
+  --spacex-medium-gray: #2d3748;
+  --spacex-light-gray: #3d4f6a;
+  --spacex-border-gray: #4a5568;
+  --spacex-text-gray: #e5e7eb;
+  --spacex-white: #ffffff;
+
+  /* Solar accents */
+  --solar-gold: #FFD700;
+  --solar-amber: #FFA500;
+
+  /* Battery status */
+  --battery-excellent: #10B981;
+  --battery-critical: #EF4444;
+
+  /* Font settings */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color-scheme: dark;
+  color: var(--spacex-text-gray);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -13,60 +38,122 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* HTML & Body */
 html {
-  /* Force scrollbar to always show, preventing horizontal shift */
   overflow-y: scroll;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  /* Removed display: flex and place-items: center to fix layout conflicts */
+
+  /* Deep slate background - comfortable dark */
+  background: #111827;
+  color: var(--spacex-text-gray);
+}
+
+/* Links */
+a {
+  font-weight: 500;
+  color: var(--spacex-white);
+  text-decoration: inherit;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--spacex-text-gray);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  color: var(--spacex-white);
+  letter-spacing: -0.02em;
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-size: 6em;
+  line-height: 0.9;
+  font-weight: 900;
+  letter-spacing: -0.04em;
 }
 
+/* Buttons */
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
+  border-radius: 0;
+  border: 2px solid var(--spacex-white);
   padding: 0.6em 1.2em;
   font-size: 1em;
-  font-weight: 500;
+  font-weight: 600;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all 0.3s ease;
+  background: transparent;
+  color: var(--spacex-white);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+button:hover {
+  background: var(--spacex-white);
+  color: var(--spacex-black);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 2px solid var(--spacex-white);
+  outline-offset: 2px;
+}
+
+/* Minimal Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--spacex-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--spacex-border-gray);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--spacex-light-gray);
+}
+
+/* Firefox Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--spacex-border-gray) var(--spacex-black);
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+}
+
+/* Selection */
+::selection {
+  background: var(--solar-gold);
+  color: var(--spacex-black);
+}
+
+::-moz-selection {
+  background: var(--solar-gold);
+  color: var(--spacex-black);
+}
+
+/* Focus Visible */
+:focus-visible {
+  outline: 2px solid var(--spacex-white);
+  outline-offset: 2px;
 }

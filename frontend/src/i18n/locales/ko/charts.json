@@ -1,22 +1,22 @@
 {
   "profitChart": {
     "title": "시간에 따른 누적 수익",
-    "xAxis": "시간 (시간)",
+    "xAxis": "일 (day)",
     "yAxis": "수익 (원)",
     "tooltip": {
-      "hour": "시간: {{hour}}"
+      "hour": "{{day}}일차"
     }
   },
   "predictionChart": {
     "title": "LSTM 예측 vs 실제 태양광 발전",
-    "xAxis": "시간 (시간)",
+    "xAxis": "시간 (h)",
     "yAxis": "전력 (kW)",
     "legend": {
       "actual": "실제 태양광",
       "predicted": "LSTM 예측"
     },
     "tooltip": {
-      "hour": "시간: {{hour}}"
+      "hour": "{{hour}}h"
     }
   },
   "metrics": {
