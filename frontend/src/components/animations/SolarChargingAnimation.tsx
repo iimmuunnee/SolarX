@@ -1,114 +1,188 @@
 /**
- * SolarChargingAnimation - 3-phase loop: charging → converting → discharging
- * Static sun with glow pulse, energy particles, battery fill, and ₩ conversion badge
+ * SolarChargingAnimation - GSAP 3-phase loop: charging → converting → selling
  */
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Box } from '@chakra-ui/react';
-import { motion, useReducedMotion } from 'framer-motion';
+import gsap from 'gsap';
 
-type Phase = 'charging' | 'converting' | 'discharging';
+// ── Geometry constants (340 × 500 viewBox) ──
+const SUN_CX = 170;
+const SUN_CY = 90;
+const BAT_X  = 120;
+const BAT_Y  = 272;
+const BAT_W  = 100;
+const BAT_H  = 140;
+const FILL_X       = BAT_X + 2;              // 122
+const FILL_W       = BAT_W - 4;              // 96
+const FILL_BOTTOM  = BAT_Y + BAT_H - 2;      // 410
+const FILL_MAX_H   = BAT_H - 4;              // 136
+const FILL_80_H    = FILL_MAX_H * 0.8;       // 108.8
+const FILL_80_Y    = FILL_BOTTOM - FILL_80_H; // ~301
 
-const CHARGE_DURATION = 4000;   // ms: SOC 0 → 80
-const CONVERT_DURATION = 900;   // ms: flash + ₩ appear
-const DISCHARGE_DURATION = 2000; // ms: SOC 80 → 0, ₩ flies up
-const PAUSE_DURATION = 800;     // ms: pause before next cycle
+const PARTICLE_Y_START = SUN_CY + 34; // 124 — just below sun edge
+const PARTICLE_Y_END   = BAT_Y - 2;  // 270 — just above battery top
 
 const SUN_RAYS = Array.from({ length: 8 }, (_, i) => i);
 
-function getSocFillColor(soc: number): string {
-  if (soc >= 80) return '#10B981';
-  if (soc >= 50) return '#22C55E';
-  if (soc >= 20) return '#F59E0B';
-  return '#EF4444';
-}
-
-// Battery geometry
-const BAT_X = 98;
-const BAT_Y = 240;
-const BAT_W = 64;
-const BAT_H = 116;
+const getBatteryFillColor = (socPct: number) => {
+  if (socPct <= 10) return '#EF4444'; // red
+  if (socPct <= 20) return '#FACC15'; // yellow
+  return '#22C55E'; // green
+};
 
 export const SolarChargingAnimation = () => {
-  const shouldReduceMotion = useReducedMotion();
-  const [phase, setPhase] = useState<Phase>('charging');
-  const [soc, setSoc] = useState(0);
-  const rafRef = useRef<number | null>(null);
-  const startRef = useRef<number>(0);
-  const socRef = useRef<number>(0);
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const glowRef    = useRef<SVGCircleElement>(null);
+  const p0Ref      = useRef<SVGCircleElement>(null);
+  const p1Ref      = useRef<SVGCircleElement>(null);
+  const p2Ref      = useRef<SVGCircleElement>(null);
+  const battFillRef = useRef<SVGRectElement>(null);
+  const battPctRef  = useRef<SVGTextElement>(null);
+  const badgeRef    = useRef<SVGGElement>(null);
+  const gridRef     = useRef<SVGGElement>(null);
 
   useEffect(() => {
-    if (shouldReduceMotion) {
-      setSoc(50);
+    if (prefersReducedMotion) {
+      if (battFillRef.current) {
+        gsap.set(battFillRef.current, {
+          attr: {
+            height: FILL_MAX_H * 0.5,
+            y: FILL_BOTTOM - FILL_MAX_H * 0.5,
+            fill: getBatteryFillColor(50),
+          },
+        });
+      }
+      if (battPctRef.current) battPctRef.current.textContent = '50%';
       return;
     }
 
-    let currentPhase: Phase = 'charging';
-    let phaseStart = performance.now();
-    socRef.current = 0;
+    const particles = [p0Ref.current, p1Ref.current, p2Ref.current];
 
-    function tick(now: number) {
-      const elapsed = now - phaseStart;
+    // ── Initial states ──
+    gsap.set(glowRef.current, { opacity: 0 });
+    gsap.set(particles, { opacity: 0, attr: { cy: PARTICLE_Y_START } });
+    gsap.set(battFillRef.current, { attr: { height: 0, y: FILL_BOTTOM, fill: getBatteryFillColor(0) } });
+    gsap.set(badgeRef.current, { opacity: 0, x: 0, y: 0, scale: 1 });
+    gsap.set(gridRef.current, { scale: 1, svgOrigin: '322 215' });
+    if (battPctRef.current) battPctRef.current.textContent = '0%';
 
-      if (currentPhase === 'charging') {
-        const progress = Math.min(elapsed / CHARGE_DURATION, 1);
-        const newSoc = Math.round(progress * 80);
-        if (newSoc !== socRef.current) {
-          socRef.current = newSoc;
-          setSoc(newSoc);
-        }
-        if (progress >= 1) {
-          currentPhase = 'converting';
-          setPhase('converting');
-          phaseStart = now;
-        }
-      } else if (currentPhase === 'converting') {
-        if (elapsed >= CONVERT_DURATION) {
-          currentPhase = 'discharging';
-          setPhase('discharging');
-          phaseStart = now;
-        }
-      } else if (currentPhase === 'discharging') {
-        const progress = Math.min(elapsed / DISCHARGE_DURATION, 1);
-        const newSoc = Math.round(80 * (1 - progress));
-        if (newSoc !== socRef.current) {
-          socRef.current = newSoc;
-          setSoc(newSoc);
-        }
-        if (progress >= 1) {
-          // pause then restart
-          setTimeout(() => {
-            currentPhase = 'charging';
-            socRef.current = 0;
-            setSoc(0);
-            setPhase('charging');
-            phaseStart = performance.now();
-            rafRef.current = requestAnimationFrame(tick);
-          }, PAUSE_DURATION);
-          return; // stop RAF loop during pause
-        }
-      }
+    const chargeProxy    = { value: 0 };
+    const dischargeProxy = { value: 80 };
 
-      rafRef.current = requestAnimationFrame(tick);
-    }
+    const tl = gsap.timeline({ repeat: -1 });
 
-    rafRef.current = requestAnimationFrame(tick);
-    startRef.current = performance.now();
+    // ── Stage 1: CHARGING (0–4s) ──
+
+    tl.fromTo(glowRef.current,
+      { opacity: 0 },
+      { opacity: 0.4, duration: 1, ease: 'sine.inOut', yoyo: true, repeat: 3 },
+      0,
+    );
+
+    const MOVE_DUR    = 0.9;
+    const FADE_DUR    = 0.25;
+    const STAGGER     = 0.4;
+    const PASS2_START = 1.9;
+
+    particles.forEach((p, i) => {
+      const s1 = i * STAGGER;
+      const s2 = PASS2_START + i * STAGGER;
+
+      tl.fromTo(p,
+        { opacity: 0, attr: { cy: PARTICLE_Y_START } },
+        { opacity: 0.9, attr: { cy: PARTICLE_Y_END }, duration: MOVE_DUR, ease: 'power1.in' },
+        s1,
+      );
+      tl.to(p, { opacity: 0, duration: FADE_DUR }, s1 + MOVE_DUR);
+
+      tl.fromTo(p,
+        { opacity: 0, attr: { cy: PARTICLE_Y_START } },
+        { opacity: 0.9, attr: { cy: PARTICLE_Y_END }, duration: MOVE_DUR, ease: 'power1.in' },
+        s2,
+      );
+      tl.to(p, { opacity: 0, duration: FADE_DUR }, s2 + MOVE_DUR);
+    });
+
+    tl.fromTo(battFillRef.current,
+      { attr: { height: 0, y: FILL_BOTTOM } },
+      { attr: { height: FILL_80_H, y: FILL_80_Y }, duration: 4, ease: 'power1.inOut' },
+      0,
+    );
+
+    tl.fromTo(chargeProxy,
+      { value: 0 },
+      {
+        value: 80, duration: 4, ease: 'power1.inOut',
+        onUpdate: () => {
+          const soc = Math.round(chargeProxy.value);
+          if (battPctRef.current) battPctRef.current.textContent = `${soc}%`;
+          if (battFillRef.current) gsap.set(battFillRef.current, { attr: { fill: getBatteryFillColor(soc) } });
+        },
+      },
+      0,
+    );
+
+    // ── Stage 2: CONVERTING (4–5s) ──
+
+    tl.fromTo(badgeRef.current,
+      { opacity: 0, scale: 0.5, x: 0, y: 0, svgOrigin: `${SUN_CX} 210` },
+      { opacity: 1, scale: 1.1, duration: 0.4, ease: 'back.out(1.7)' },
+      4,
+    );
+    tl.to(badgeRef.current, { scale: 1, duration: 0.2 }, 4.4);
+
+    // ── Stage 3: SELLING (5–7s) ──
+
+    tl.set(badgeRef.current, { x: 0, y: 0 }, 4.99);
+    tl.fromTo(badgeRef.current,
+      { x: 0, y: 0, opacity: 1 },
+      { x: 130, y: 10, opacity: 0, duration: 2, ease: 'power1.inOut', immediateRender: false },
+      5,
+    );
+    tl.fromTo(
+      gridRef.current,
+      { scale: 1 },
+      { scale: 1.08, duration: 0.18, ease: 'power2.out', yoyo: true, repeat: 1, immediateRender: false },
+      6.72,
+    );
+
+    tl.fromTo(battFillRef.current,
+      { attr: { height: FILL_80_H, y: FILL_80_Y } },
+      { attr: { height: 0, y: FILL_BOTTOM }, duration: 2, ease: 'power1.inOut' },
+      5,
+    );
+
+    tl.fromTo(dischargeProxy,
+      { value: 80 },
+      {
+        value: 0, duration: 2, ease: 'power1.inOut',
+        onUpdate: () => {
+          const soc = Math.round(dischargeProxy.value);
+          if (battPctRef.current) battPctRef.current.textContent = `${soc}%`;
+          if (battFillRef.current) gsap.set(battFillRef.current, { attr: { fill: getBatteryFillColor(soc) } });
+        },
+      },
+      5,
+    );
+
+    // ── Reset before repeat (7–7.8s) ──
+    tl.set(badgeRef.current, { x: 0, y: 0, opacity: 0, scale: 1 }, 7);
+    tl.set(gridRef.current, { scale: 1 }, 7);
+    tl.set(battFillRef.current, { attr: { fill: getBatteryFillColor(0) } }, 7);
+    tl.to({}, { duration: 0.8 }, 7);
 
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      tl.kill();
     };
-  }, [shouldReduceMotion]);
-
-  const fillColor = getSocFillColor(soc);
-  const fillHeight = (soc / 100) * BAT_H;
-  const fillY = BAT_Y + BAT_H - fillHeight;
-
-  const isCharging = phase === 'charging';
+  }, [prefersReducedMotion]);
 
   return (
     <Box
-      width="260px"
-      height="380px"
+      width="340px"
+      height="500px"
       bg="spacex.darkGray"
       border="1px solid"
       borderColor="spacex.borderGray"
@@ -118,163 +192,138 @@ export const SolarChargingAnimation = () => {
       position="relative"
       overflow="hidden"
     >
-      <svg width="260" height="410" viewBox="0 0 260 410">
+      <svg width="340" height="500" viewBox="0 0 340 500">
         <defs>
-          <filter id="sunGlow">
-            <feGaussianBlur stdDeviation="4" result="blur" />
+          <filter id="sunGlowX">
+            <feGaussianBlur stdDeviation="5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
+          <linearGradient id="gridBoltGradX" x1="308" y1="199" x2="334" y2="229" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#93c5fd" />
+            <stop offset="100%" stopColor="#38bdf8" />
+          </linearGradient>
+          <linearGradient id="gridPanelGradX" x1="300" y1="194" x2="344" y2="236" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#1e293b" />
+            <stop offset="100%" stopColor="#0b1220" />
+          </linearGradient>
         </defs>
 
-        {/* ── Static Sun ── */}
-        {/* Glow ring (animated opacity only) */}
-        <motion.circle
-          cx="130" cy="72" r="36"
-          fill="none"
-          stroke="#FFD700"
-          strokeWidth="2"
+        {/* Glow ring */}
+        <circle
+          ref={glowRef}
+          cx={SUN_CX} cy={SUN_CY} r="48"
+          fill="none" stroke="#FFD700" strokeWidth="2.5"
           opacity={0}
-          animate={shouldReduceMotion ? { opacity: 0 } : { opacity: [0, 0.35, 0] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
         />
 
-        {/* Static rays (fixed position, no rotation) */}
+        {/* Sun rays (static) */}
         {SUN_RAYS.map((i) => {
           const angle = (i * 45 * Math.PI) / 180;
-          const inner = 28;
-          const outer = 42;
-          const x1 = 130 + inner * Math.cos(angle);
-          const y1 = 72 + inner * Math.sin(angle);
-          const x2 = 130 + outer * Math.cos(angle);
-          const y2 = 72 + outer * Math.sin(angle);
+          const x1 = SUN_CX + 30 * Math.cos(angle);
+          const y1 = SUN_CY + 30 * Math.sin(angle);
+          const x2 = SUN_CX + 46 * Math.cos(angle);
+          const y2 = SUN_CY + 46 * Math.sin(angle);
           return (
-            <line
-              key={i}
-              x1={x1} y1={y1} x2={x2} y2={y2}
-              stroke="#FFD700"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              opacity={0.8}
-            />
+            <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
+              stroke="#FFD700" strokeWidth="2.5" strokeLinecap="round" opacity={0.8} />
           );
         })}
 
         {/* Sun core */}
-        <circle cx="130" cy="72" r="20" fill="#FFD700" filter="url(#sunGlow)" />
-        <circle cx="130" cy="72" r="14" fill="#FFA500" />
+        <circle cx={SUN_CX} cy={SUN_CY} r="24" fill="#FFD700" filter="url(#sunGlowX)" />
+        <circle cx={SUN_CX} cy={SUN_CY} r="16" fill="#FFA500" />
 
-        {/* ── Energy path guide ── */}
+        {/* Energy path guide */}
         <line
-          x1="130" y1="116" x2="130" y2="238"
+          x1={SUN_CX} y1={PARTICLE_Y_START}
+          x2={SUN_CX} y2={PARTICLE_Y_END}
           stroke="#FFD700" strokeWidth="1.5"
           strokeDasharray="5 5" opacity={0.2}
         />
 
-        {/* ── Energy particles (only during charging) ── */}
-        {!shouldReduceMotion && isCharging && [0, 1, 2].map((i) => (
-          <motion.circle
-            key={i}
-            cx="130" r="5"
-            fill="#FFD700"
-            initial={{ cy: 116, opacity: 0 }}
-            animate={{ cy: [116, 238], opacity: [0, 0.9, 0.9, 0] }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: i * 0.5,
-            }}
-          />
-        ))}
+        {/* Energy particles */}
+        <circle ref={p0Ref} cx={SUN_CX} cy={PARTICLE_Y_START} r="6" fill="#FFD700" opacity={0} />
+        <circle ref={p1Ref} cx={SUN_CX} cy={PARTICLE_Y_START} r="6" fill="#FFD700" opacity={0} />
+        <circle ref={p2Ref} cx={SUN_CX} cy={PARTICLE_Y_START} r="6" fill="#FFD700" opacity={0} />
 
-        {/* ── Battery ── */}
-        {/* Terminal nub */}
-        <rect x="113" y="232" width="34" height="8" rx="1"
+        {/* Battery terminal nub */}
+        <rect x={BAT_X + 28} y={BAT_Y - 10} width="44" height="10" rx="1"
           fill="#2d3748" stroke="white" strokeWidth="1.5" />
 
         {/* Battery container */}
         <rect x={BAT_X} y={BAT_Y} width={BAT_W} height={BAT_H}
           rx="2" fill="#111827" stroke="white" strokeWidth="2" />
 
-        {/* Level guides */}
-        {[25, 50, 75].map((level) => (
-          <line
-            key={level}
-            x1={BAT_X} y1={BAT_Y + BAT_H * (1 - level / 100)}
-            x2={BAT_X + BAT_W} y2={BAT_Y + BAT_H * (1 - level / 100)}
+        {/* Level guides at 25 / 50 / 75 % */}
+        {[25, 50, 75].map((pct) => (
+          <line key={pct}
+            x1={BAT_X}       y1={BAT_Y + BAT_H * (1 - pct / 100)}
+            x2={BAT_X + BAT_W} y2={BAT_Y + BAT_H * (1 - pct / 100)}
             stroke="#4a5568" strokeWidth="1" opacity={0.4}
           />
         ))}
 
-        {/* Battery fill */}
-        <clipPath id="battClip">
-          <rect x={BAT_X + 2} y={BAT_Y + 2} width={BAT_W - 4} height={BAT_H - 4} />
+        {/* Clip path for battery fill */}
+        <clipPath id="battClipX">
+          <rect x={FILL_X} y={BAT_Y + 2} width={FILL_W} height={FILL_MAX_H} />
         </clipPath>
-        {fillHeight > 0 && (
-          <rect
-            x={BAT_X + 2}
-            y={fillY + 2}
-            width={BAT_W - 4}
-            height={Math.max(0, fillHeight - 4)}
-            fill={fillColor}
-            opacity={0.9}
-            clipPath="url(#battClip)"
-          />
-        )}
 
-        {/* SOC percentage */}
+        {/* Battery fill rect */}
+        <rect
+          ref={battFillRef}
+          x={FILL_X}
+          y={FILL_BOTTOM}
+          width={FILL_W}
+          height={0}
+          fill={getBatteryFillColor(0)}
+          opacity={0.9}
+          clipPath="url(#battClipX)"
+        />
+
+        {/* SOC percentage text */}
         <text
-          x="130" y={BAT_Y + BAT_H / 2 + 1}
+          ref={battPctRef}
+          x={SUN_CX} y={BAT_Y + BAT_H / 2 + 1}
           textAnchor="middle" dominantBaseline="middle"
-          fill="white" fontSize="17" fontWeight="bold"
+          fill="white" fontSize="20" fontWeight="bold"
           fontFamily="monospace"
-          style={{ mixBlendMode: 'difference' }}
+          style={{ mixBlendMode: 'difference' as const }}
         >
-          {soc}%
+          0%
         </text>
 
-        {/* ── ₩ Conversion Badge ── */}
-        {!shouldReduceMotion && (phase === 'converting' || phase === 'discharging') && (
-          <motion.g
-            initial={{ opacity: 0, y: 0 }}
-            animate={
-              phase === 'converting'
-                ? { opacity: 1, y: 0, scale: [0.5, 1.1, 1] }
-                : { opacity: [1, 1, 0], y: -70 }
-            }
-            transition={
-              phase === 'converting'
-                ? { duration: 0.5, ease: 'backOut' }
-                : { duration: DISCHARGE_DURATION / 1000, ease: 'easeOut' }
-            }
+        {/* ₩ Conversion Badge */}
+        <g ref={badgeRef} opacity={0}>
+          <circle cx={SUN_CX} cy="210" r="22" fill="#facc15" stroke="#a16207" strokeWidth="2" />
+          <circle cx={SUN_CX} cy="210" r="16" fill="none" stroke="#ca8a04" strokeWidth="1.1" opacity={0.85} />
+          <text
+            x={SUN_CX} y="210.5"
+            textAnchor="middle" dominantBaseline="middle"
+            fill="#7c2d12" fontSize="20" fontWeight="900"
+            fontFamily="monospace"
           >
-            {/* Badge background */}
-            <circle cx="130" cy="195" r="22" fill="#1c2536" stroke="#FFD700" strokeWidth="2" />
-            {/* ₩ symbol */}
-            <text
-              x="130" y="196"
-              textAnchor="middle" dominantBaseline="middle"
-              fill="#FFD700" fontSize="22" fontWeight="bold"
-              fontFamily="monospace"
-            >
-              ₩
-            </text>
-          </motion.g>
-        )}
+            {'\u20A9'}
+          </text>
+        </g>
 
-        {/* ── Bottom label ── */}
-        <text
-          x="130" y="384"
-          textAnchor="middle"
-          fill="#d1d5db" fontSize="12"
-          fontFamily="monospace" letterSpacing="4"
-          fontWeight="bold"
-        >
-          {phase === 'charging' ? 'CHARGING' : phase === 'converting' ? 'CONVERTING' : 'SELLING'}
-        </text>
+        {/* Upgraded power grid icon */}
+        <g ref={gridRef}>
+          <rect x="300" y="194" width="44" height="42" rx="6" fill="url(#gridPanelGradX)" stroke="#334155" strokeWidth="1.2" />
+          <line x1="308" y1="204" x2="336" y2="204" stroke="#7dd3fc" strokeWidth="1.6" opacity={0.95} />
+          <line x1="312" y1="204" x2="312" y2="228" stroke="#7dd3fc" strokeWidth="1.6" opacity={0.9} />
+          <line x1="332" y1="204" x2="332" y2="228" stroke="#7dd3fc" strokeWidth="1.6" opacity={0.9} />
+          <line x1="308" y1="228" x2="336" y2="228" stroke="#7dd3fc" strokeWidth="1.6" opacity={0.95} />
+          <circle cx="312" cy="204" r="1.8" fill="#bae6fd" />
+          <circle cx="332" cy="204" r="1.8" fill="#bae6fd" />
+          <path
+            d="M322 198 L315 212 H320 L318 227 L329 210 H324 Z"
+            fill="url(#gridBoltGradX)"
+            opacity={0.98}
+          />
+        </g>
       </svg>
     </Box>
   );

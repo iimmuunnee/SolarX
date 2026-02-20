@@ -1,7 +1,7 @@
 # HANDOFF - SolarX 프로젝트 인계 문서
 
-**최종 업데이트:** 2026-02-20 01:10
-**작성자:** Claude Code (Sonnet 4.6)
+**최종 업데이트:** 2026-02-20
+**작성자:** Claude Code (Sonnet 4.6) + Codex (GPT-5)
 **목적:** 다음 에이전트가 이 파일만 읽고 작업을 이어갈 수 있도록 현재 상태 정리
 
 > ⚠️ **중요:** 이 문서는 프로젝트의 현재 상태를 정확히 반영합니다.
@@ -26,6 +26,29 @@
 ## 🔄 최근 세션 업데이트 (2026-02-20)
 
 이번 세션은 **프론트엔드 UI/UX 개선** 작업이었다. 기능 변경 없음, 배포 관련 변경 없음.
+
+### 0. ✅ 추가 업데이트 (2026-02-20, Codex 반영)
+
+아래 내용은 기존 HANDOFF 이후 추가된 실제 변경(diff) 기준으로 반영:
+
+- 백엔드 실행 설정 외부화:
+`backend/app/config.py`에 `host`, `port` 설정 추가.
+`backend/run_server.py`에 `--host`, `--port` CLI 인자 추가(기본값은 settings/환경변수).
+- SOC 안내 UI 공통 컴포넌트화:
+`frontend/src/components/common/SOCLowInfoTooltip.tsx` 신규 추가.
+`Demo.tsx`, `Results.tsx`에서 중복 Tooltip 구현 제거 후 공통 컴포넌트 사용.
+- SOH 게이지 상태 기준 변경:
+`frontend/src/components/battery/CircularSOHGauge.tsx`를 ACC II 워런티 하한 기준으로 갱신.
+`>=75` Healthy(초록), `70-74.9` Warning(노랑), `<70` Critical(빨강).
+- Solar 충전 애니메이션 리팩터링:
+`frontend/src/components/animations/SolarChargingAnimation.tsx`가
+Framer Motion 기반 상태루프에서 GSAP timeline 기반 3단계 루프로 교체됨
+(charging -> converting -> selling), 캔버스 크기 `340x500`으로 확장.
+- 프론트엔드 의존성 추가:
+`frontend/package.json` 및 lockfile에 `gsap` 추가.
+- 랜딩 카피 미세 조정:
+`frontend/src/i18n/locales/en/pages.json`에서 `titleLine1`을
+`SolarX: AI-Powered` -> `SolarX: AI Powered`로 수정.
 
 ### 1. ✅ BatteryGauge SOC 툴팁 개선
 

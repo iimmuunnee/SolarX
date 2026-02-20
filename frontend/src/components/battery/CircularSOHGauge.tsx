@@ -11,6 +11,21 @@ interface CircularSOHGaugeProps {
   strokeWidth?: number;
 }
 
+// SOH color thresholds based on ACC II warranty floors:
+// >=75% (MY 2031+ floor), 70-74.9% (MY 2026-2030 floor band), <70% (below floor)
+const SOH_GREEN_THRESHOLD = 75;
+const SOH_YELLOW_THRESHOLD = 70;
+
+const getSohStyle = (soh: number) => {
+  if (soh >= SOH_GREEN_THRESHOLD) {
+    return { color: '#22C55E', label: 'Healthy' };
+  }
+  if (soh >= SOH_YELLOW_THRESHOLD) {
+    return { color: '#FACC15', label: 'Warning' };
+  }
+  return { color: '#EF4444', label: 'Critical' };
+};
+
 export const CircularSOHGauge = ({
   soh,
   size = 120,
@@ -25,6 +40,7 @@ export const CircularSOHGauge = ({
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (clampedSOH / 100) * circumference;
+  const sohStyle = getSohStyle(clampedSOH);
 
   return (
     <VStack spacing={2}>
@@ -51,7 +67,7 @@ export const CircularSOHGauge = ({
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="#ffffff"
+            stroke={sohStyle.color}
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeDasharray={circumference}
@@ -80,7 +96,7 @@ export const CircularSOHGauge = ({
           <Text
             fontSize="2xl"
             fontWeight="bold"
-            color="white"
+            color={sohStyle.color}
             fontFamily="mono"
           >
             {clampedSOH.toFixed(1)}%
@@ -100,15 +116,12 @@ export const CircularSOHGauge = ({
       {/* Health Status Label */}
       <Text
         fontSize="xs"
-        color="spacex.textGray"
+        color={sohStyle.color}
         fontWeight="semibold"
         textTransform="uppercase"
         letterSpacing="wide"
       >
-        {clampedSOH >= 90 && 'Excellent'}
-        {clampedSOH >= 75 && clampedSOH < 90 && 'Good'}
-        {clampedSOH >= 50 && clampedSOH < 75 && 'Degraded'}
-        {clampedSOH < 50 && 'Critical'}
+        {sohStyle.label}
       </Text>
     </VStack>
   );

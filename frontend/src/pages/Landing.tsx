@@ -33,23 +33,24 @@ export const Landing = () => {
       >
         <Box w="100%">
         <Section maxW="7xl" py={20}>
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={12} alignItems="center">
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={16} alignItems="center">
             {/* Left: Text content */}
-            <VStack spacing={6} align="flex-start">
+            <VStack spacing={6} align="flex-start" minWidth="0">
               <Heading
                 as="h1"
-                fontSize={{ base: '5xl', md: '7xl', lg: '8xl' }}
+                fontSize={{ base: '5xl', md: '7xl', xl: '8xl' }}
                 fontWeight="900"
                 color="white"
                 lineHeight="0.9"
                 letterSpacing="tighter"
                 textAlign={{ base: 'center', md: 'left' }}
+                display="flex"
+                flexDirection="column"
               >
-                {/* Line 1: nowrap ensures it never breaks mid-word */}
-                <Box as="span" display="block" whiteSpace="nowrap">
+                <Box as="span" whiteSpace="nowrap">
                   {t('pages:landing.hero.titleLine1')}
                 </Box>
-                <Box as="span" display="block">
+                <Box as="span">
                   {t('pages:landing.hero.titleLine2')}
                 </Box>
               </Heading>
@@ -82,7 +83,7 @@ export const Landing = () => {
             {/* Right: Solar charging animation (desktop only) */}
             <Box
               display={{ base: 'none', md: 'flex' }}
-              justifyContent="center"
+              justifyContent="flex-end"
               alignItems="center"
             >
               <SolarChargingAnimation />

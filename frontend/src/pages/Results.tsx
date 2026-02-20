@@ -22,7 +22,6 @@ import {
   Badge,
   Skeleton,
   SkeletonText,
-  Tooltip,
 } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import { Section } from '../components/layout/Section';
@@ -32,6 +31,7 @@ import { PredictionChart } from '../components/charts/PredictionChart';
 import { MetricsGrid } from '../components/charts/MetricsGrid';
 import { BatteryGauge, SOC_EXPLANATION, SOC_LOW_THRESHOLD } from '../components/battery/BatteryGauge';
 import { CircularSOHGauge } from '../components/battery/CircularSOHGauge';
+import { SOCLowInfoTooltip } from '../components/common/SOCLowInfoTooltip';
 import { formatKRW, formatPercent, formatNumber } from '../utils/formatters';
 
 export const Results = () => {
@@ -152,38 +152,10 @@ export const Results = () => {
                   </Text>
                 </Box>
                 <Box position="relative">
-                  {/* Single SOC tooltip — shown only when winner SOC is low */}
-                  {winnerSOCLow && (
-                    <Tooltip
-                      label={SOC_EXPLANATION}
-                      placement="top-end"
-                      hasArrow
-                      bg="gray.700"
-                      color="white"
-                      fontSize="xs"
-                      maxW="260px"
-                      p={3}
-                      borderRadius="md"
-                      textAlign="left"
-                    >
-                      <Text
-                        position="absolute"
-                        top={0}
-                        right={0}
-                        fontSize="2xs"
-                        color="spacex.textGray"
-                        textTransform="uppercase"
-                        letterSpacing="wide"
-                        cursor="help"
-                        borderBottom="1px dotted"
-                        borderBottomColor="spacex.textGray"
-                        _hover={{ color: 'white', borderBottomColor: 'white' }}
-                      >
-                        왜 SOC가 낮나요?
-                      </Text>
-                    </Tooltip>
-                  )}
-                  <HStack spacing={6} justify="center" pt={winnerSOCLow ? 5 : 0}>
+                  <HStack justify="flex-end" mb={3}>
+                    {winnerSOCLow && <SOCLowInfoTooltip label={SOC_EXPLANATION} />}
+                  </HStack>
+                  <HStack spacing={6} justify="center">
                     <BatteryGauge soc={winner.avg_soc_percent} width="70px" height="140px" />
                     <CircularSOHGauge soh={winner.soh_percent} size={100} />
                   </HStack>
@@ -292,3 +264,4 @@ export const Results = () => {
     </Box>
   );
 };
+

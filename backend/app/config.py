@@ -18,6 +18,10 @@ class Settings(BaseSettings):
         "http://localhost:8000",
     ]
 
+    # Server Settings
+    host: str = "127.0.0.1"
+    port: int = 8000
+
     # Cache Settings
     cache_maxsize: int = 100
     cache_ttl_seconds: int = 3600  # 1 hour
