@@ -13,19 +13,19 @@
     },
     "cards": {
       "story": {
-        "title": "📖 스토리",
+        "title": "스토리",
         "description": "v1.0에서 v5.0까지 프로젝트 진화 과정"
       },
       "demo": {
-        "title": "🎮 데모",
+        "title": "데모",
         "description": "맞춤 매개변수로 대화형 시뮬레이션"
       },
       "architecture": {
-        "title": "🏗️ 아키텍처",
+        "title": "아키텍처",
         "description": "시스템에 대한 기술적 심층 분석"
       },
       "results": {
-        "title": "📊 결과",
+        "title": "결과",
         "description": "벤치마크 성능 쇼케이스"
       }
     }

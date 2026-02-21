@@ -95,27 +95,37 @@ export const Landing = () => {
 
       {/* Metrics Section - Separated */}
       <Section py={20}>
-        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={16}>
-          {[
-            { value: '3', label: t('pages:landing.hero.metrics.vendors') },
-            { value: '99.3%', label: t('pages:landing.hero.metrics.soh') },
-            { value: '284%', label: t('pages:landing.hero.metrics.roi') },
-          ].map((metric, index) => (
-            <VStack key={index} spacing={3} align="center">
-              <Heading size="3xl" color="solar.gold" fontWeight="800">
-                {metric.value}
-              </Heading>
-              <Text
-                color="gray.500"
-                textTransform="uppercase"
-                fontSize="xs"
-                letterSpacing="widest"
-              >
-                {metric.label}
-              </Text>
-            </VStack>
-          ))}
-        </SimpleGrid>
+        <Box
+          bg="spacex.darkGray"
+          borderWidth="1px"
+          borderColor="spacex.borderGray"
+          borderRadius="0"
+          px={{ base: 6, md: 10 }}
+          py={{ base: 8, md: 10 }}
+        >
+          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={16}>
+            {[
+              { value: '3', label: t('pages:landing.hero.metrics.vendors') },
+              { value: '99.3%', label: t('pages:landing.hero.metrics.soh') },
+              { value: '284%', label: t('pages:landing.hero.metrics.roi') },
+            ].map((metric, index) => (
+              <VStack key={index} spacing={3} align="center">
+                <Heading size="3xl" color="solar.gold" fontWeight="800">
+                  {metric.value}
+                </Heading>
+                <Text
+                  color="gray.400"
+                  textTransform="uppercase"
+                  fontSize={{ base: 'sm', md: 'md' }}
+                  letterSpacing="wider"
+                  fontWeight="600"
+                >
+                  {metric.label}
+                </Text>
+              </VStack>
+            ))}
+          </SimpleGrid>
+        </Box>
       </Section>
 
       {/* Quick Navigation Cards - SpaceX Minimal */}
