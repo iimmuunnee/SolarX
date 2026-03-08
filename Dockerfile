@@ -10,6 +10,7 @@ RUN npm ci
 
 # Copy frontend source and build
 COPY frontend/ ./
+ENV VITE_API_URL=/api
 RUN npm run build
 
 # Stage 2: Python runtime with backend + frontend

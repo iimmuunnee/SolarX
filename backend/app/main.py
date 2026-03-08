@@ -1,6 +1,7 @@
 """SolarX FastAPI Application."""
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 import logging
 
@@ -66,8 +67,19 @@ import os
 
 frontend_dist = os.path.join(os.path.dirname(__file__), "../..", "frontend", "dist")
 if os.path.exists(frontend_dist):
-    # Mount static files with html=True for SPA routing
-    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="static")
+    # Mount static assets (JS, CSS, images)
+    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist, "assets")), name="assets")
+
+    # SPA catch-all: serve index.html for all non-API, non-asset routes
+    @app.get("/{full_path:path}")
+    async def serve_spa(request: Request, full_path: str):
+        """Serve SPA index.html for client-side routing."""
+        # Check if the requested file exists in dist (e.g., favicon.ico, robots.txt)
+        file_path = os.path.join(frontend_dist, full_path)
+        if full_path and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        return FileResponse(os.path.join(frontend_dist, "index.html"))
+
     logger.info(f"✅ Serving frontend from {frontend_dist}")
 else:
     # Fallback: API-only mode if frontend not built
