@@ -57,13 +57,40 @@
   "results": {
     "loading": "사전 계산된 벤치마크 결과를 로드하는 중...",
     "winner": {
-      "badge": "🏆 우승자",
+      "badge": "OPTIMAL BATTERY",
       "totalRevenue": "총 수익",
       "stateOfHealth": "배터리 건강도",
-      "roi": "투자 수익률"
+      "roi": "투자 수익률",
+      "payback": "회수기간"
+    },
+    "hero": {
+      "scrollHint": "스크롤하여 이유를 확인하세요"
+    },
+    "context": {
+      "duration": "기간",
+      "days": "일",
+      "avgSmp": "평균 SMP",
+      "dataPoints": "데이터 포인트"
     },
     "predictionQuality": "LSTM 예측 품질",
-    "vendorComparison": "상세 벤더 비교",
+    "prediction": {
+      "mapeNote": "태양광 예측 특성상 MAPE 60%대는 기상 변동성을 고려하면 일반적입니다"
+    },
+    "vendorComparison": "경제성 상세 분석",
+    "charts": {
+      "title": "비교 분석",
+      "profitTab": "누적 수익",
+      "radarTab": "레이더 비교"
+    },
+    "insights": {
+      "title": "AI 인사이트"
+    },
+    "actions": {
+      "demo": "직접 시뮬레이션",
+      "architecture": "아키텍처 보기",
+      "share": "결과 공유",
+      "copied": "URL이 클립보드에 복사되었습니다!"
+    },
     "table": {
       "vendor": "벤더",
       "revenue": "수익",
@@ -72,6 +99,9 @@
       "roi": "ROI",
       "payback": "회수기간",
       "npv": "순현재가치",
+      "capex": "초기투자",
+      "opex": "운영비",
+      "throughput": "처리량",
       "best": "최고",
       "baseline": "기준선 (ESS 없음)",
       "years": "년"

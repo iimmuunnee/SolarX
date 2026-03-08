@@ -57,13 +57,40 @@
   "results": {
     "loading": "Loading pre-computed benchmark results...",
     "winner": {
-      "badge": "🏆 WINNER",
+      "badge": "OPTIMAL BATTERY",
       "totalRevenue": "Total Revenue",
       "stateOfHealth": "State of Health",
-      "roi": "ROI"
+      "roi": "ROI",
+      "payback": "Payback"
+    },
+    "hero": {
+      "scrollHint": "scroll to discover why"
+    },
+    "context": {
+      "duration": "Duration",
+      "days": "d",
+      "avgSmp": "Avg SMP",
+      "dataPoints": "Data Points"
     },
     "predictionQuality": "LSTM Prediction Quality",
-    "vendorComparison": "Detailed Vendor Comparison",
+    "prediction": {
+      "mapeNote": "MAPE in the 60% range is typical for solar generation prediction with weather variability"
+    },
+    "vendorComparison": "Economic Deep Dive",
+    "charts": {
+      "title": "Comparative Analysis",
+      "profitTab": "Cumulative Profit",
+      "radarTab": "Radar Comparison"
+    },
+    "insights": {
+      "title": "AI Insights"
+    },
+    "actions": {
+      "demo": "Try Demo Simulation",
+      "architecture": "View Architecture",
+      "share": "Share Results",
+      "copied": "URL copied to clipboard!"
+    },
     "table": {
       "vendor": "Vendor",
       "revenue": "Revenue",
@@ -72,9 +99,12 @@
       "roi": "ROI",
       "payback": "Payback",
       "npv": "NPV",
+      "capex": "CAPEX",
+      "opex": "OPEX",
+      "throughput": "Throughput",
       "best": "Best",
       "baseline": "Baseline (No ESS)",
-      "years": "years"
+      "years": "yr"
     }
   },
   "story": {

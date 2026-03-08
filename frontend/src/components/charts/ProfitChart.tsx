@@ -1,6 +1,7 @@
 /**
  * Profit chart component - Shows cumulative profit over time for all vendors
  */
+import { useState, useCallback } from 'react';
 import {
   LineChart,
   Line,
@@ -16,6 +17,7 @@ import { Box, Heading, Text, useColorModeValue } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import type { TimeSeriesData } from '../../types/simulation';
 import { formatKRW } from '../../utils/formatters';
+import { VENDOR_COLORS, BASELINE_COLOR } from '../../utils/vendorColors';
 
 interface ProfitChartProps {
   data: TimeSeriesData;
@@ -32,27 +34,43 @@ export const ProfitChart = ({ data, title, height = 400 }: ProfitChartProps) => 
   const { t } = useTranslation('charts');
   const gridColor = useColorModeValue('#e2e8f0', '#4a5568');
   const textColor = useColorModeValue('#2d3748', '#e2e8f0');
+  const [hiddenVendors, setHiddenVendors] = useState<Set<string>>(new Set());
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleLegendClick = useCallback((e: any) => {
+    const key = String(e?.dataKey || '');
+    if (!key) return;
+    setHiddenVendors((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }, []);
 
   // Create vendor array with final profits for sorting (distinct brand colors)
   const vendors = [
     {
       key: 'samsung',
       name: 'Samsung SDI',
-      stroke: '#3B82F6', // Blue (Samsung brand)
+      stroke: VENDOR_COLORS.samsung.primary,
       data: data.samsung_profit_krw,
       finalProfit: data.samsung_profit_krw?.[data.samsung_profit_krw.length - 1] || 0,
     },
     {
       key: 'lg',
       name: 'LG Energy Solution',
-      stroke: '#10B981', // Emerald (energy/eco)
+      stroke: VENDOR_COLORS.lg.primary,
       data: data.lg_profit_krw,
       finalProfit: data.lg_profit_krw?.[data.lg_profit_krw.length - 1] || 0,
     },
     {
       key: 'tesla',
       name: 'Tesla',
-      stroke: '#EF4444', // Red (Tesla brand)
+      stroke: VENDOR_COLORS.tesla.primary,
       data: data.tesla_profit_krw,
       finalProfit: data.tesla_profit_krw?.[data.tesla_profit_krw.length - 1] || 0,
     },
@@ -139,11 +157,12 @@ export const ProfitChart = ({ data, title, height = 400 }: ProfitChartProps) => 
               color: '#ffffff',
             }}
           />
-          <Legend />
+          <Legend onClick={handleLegendClick} wrapperStyle={{ cursor: 'pointer' }} />
           <Line
             type="monotone"
             dataKey="baseline"
-            stroke="#718096"
+            stroke={BASELINE_COLOR}
+            hide={hiddenVendors.has('baseline')}
             strokeWidth={2}
             strokeDasharray="5 5"
             dot={false}
@@ -158,6 +177,8 @@ export const ProfitChart = ({ data, title, height = 400 }: ProfitChartProps) => 
               strokeWidth={2}
               dot={false}
               name={vendor.name}
+              hide={hiddenVendors.has(vendor.key)}
+              strokeOpacity={hiddenVendors.size > 0 && !hiddenVendors.has(vendor.key) ? 1 : undefined}
             />
           ))}
           <Brush
