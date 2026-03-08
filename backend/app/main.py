@@ -26,6 +26,11 @@ async def lifespan(app: FastAPI):
     try:
         initialize_simulation_service()
         logger.info("✅ Simulation service initialized successfully")
+
+        # Warm the benchmark cache so /api/results/benchmark responds instantly
+        from .api.routes.precomputed import warm_cache
+        from .api.dependencies import get_simulation_service
+        warm_cache(get_simulation_service())
     except Exception as e:
         logger.error(f"❌ Failed to initialize simulation service: {e}")
         raise

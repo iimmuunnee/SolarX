@@ -3,7 +3,21 @@
  */
 import { useState, useCallback } from 'react';
 import { runBenchmark, runCustom } from '../services/api';
+import { fallbackBenchmarkData } from '../data/fallbackResults';
 import type { BenchmarkRequest, BenchmarkResponse, CustomRequest, CustomResponse } from '../types/simulation';
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    if (error.message === 'Network Error') {
+      return '서버가 시작 중입니다. 30초~1분 후 다시 시도해주세요. (The server is waking up. Please retry in 30s–1min.)';
+    }
+    if (error.message.includes('timeout')) {
+      return '서버 응답 시간이 초과되었습니다. 잠시 후 다시 시도해주세요. (Request timed out. Please retry shortly.)';
+    }
+    return error.message;
+  }
+  return 'Simulation failed';
+}
 
 interface SimulationState {
   loading: boolean;
@@ -25,8 +39,9 @@ export const useSimulation = () => {
       setState({ loading: false, error: null, result });
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Simulation failed';
-      setState({ loading: false, error: errorMessage, result: null });
+      const errorMessage = getErrorMessage(error);
+      // API 실패 시 fallback 데이터를 result로 설정
+      setState({ loading: false, error: errorMessage, result: fallbackBenchmarkData });
       throw error;
     }
   }, []);
@@ -38,7 +53,7 @@ export const useSimulation = () => {
       setState({ loading: false, error: null, result });
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Simulation failed';
+      const errorMessage = getErrorMessage(error);
       setState({ loading: false, error: errorMessage, result: null });
       throw error;
     }

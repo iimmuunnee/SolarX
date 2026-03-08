@@ -31,7 +31,7 @@ jobs:
       - name: Test Docker container
         run: |
           docker run -d -p 8000:8000 --name solarx-test solarx-web:latest
-          sleep 30
+          sleep 60
           curl -f http://localhost:8000/api/health || exit 1
           docker logs solarx-test
           docker stop solarx-test

@@ -1,13 +1,32 @@
 """Pre-computed results endpoints."""
+from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends
 from ...schemas.responses import BenchmarkResponse, ScalabilityResponse
 from ..dependencies import get_simulation_service
 from ...services.simulation_service import SimulationService
 from ...schemas.requests import BenchmarkRequest
-import os
-import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+# Module-level cache: compute once, serve instantly thereafter
+_benchmark_cache: Optional[BenchmarkResponse] = None
+
+
+def warm_cache(service: SimulationService) -> None:
+    """Pre-compute benchmark results and store in cache.
+    Called during server startup to ensure instant responses."""
+    global _benchmark_cache
+    if _benchmark_cache is None:
+        logger.info("Warming benchmark cache...")
+        try:
+            result = service.run_benchmark(BenchmarkRequest())
+            _benchmark_cache = result
+            logger.info("✅ Benchmark cache warmed successfully")
+        except Exception as e:
+            logger.error(f"❌ Failed to warm benchmark cache: {e}")
 
 
 @router.get("/results/benchmark", response_model=BenchmarkResponse, tags=["results"])
@@ -20,11 +39,13 @@ async def get_precomputed_benchmark(service: SimulationService = Depends(get_sim
     Returns:
         Pre-computed benchmark simulation results
     """
-    # For now, compute with default parameters
-    # In production, this would load from precomputed JSON file
+    global _benchmark_cache
+    if _benchmark_cache is not None:
+        return _benchmark_cache
+
     try:
-        default_request = BenchmarkRequest()
-        result = service.run_benchmark(default_request)
+        result = service.run_benchmark(BenchmarkRequest())
+        _benchmark_cache = result
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load benchmark results: {str(e)}")

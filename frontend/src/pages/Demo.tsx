@@ -234,9 +234,23 @@ export const Demo = () => {
             )}
 
             {error && (
-              <Alert status="error">
+              <Alert status="warning" borderRadius="0" bg="rgba(255, 165, 0, 0.1)" borderColor="orange.400" borderWidth="1px">
                 <AlertIcon />
-                {error}
+                <Box>
+                  <Text fontSize="sm" color="gray.300">{error}</Text>
+                  <Button size="sm" mt={2} variant="outline" colorScheme="orange" onClick={handleRunSimulation}>
+                    재시도 / Retry
+                  </Button>
+                </Box>
+              </Alert>
+            )}
+
+            {error && benchmarkResult && (
+              <Alert status="info" borderRadius="0" bg="rgba(0, 150, 255, 0.1)" borderColor="blue.400" borderWidth="1px">
+                <AlertIcon />
+                <Text fontSize="sm" color="gray.300">
+                  서버가 응답하지 않아 캐시된 결과를 표시합니다. / Showing cached fallback results.
+                </Text>
               </Alert>
             )}
 

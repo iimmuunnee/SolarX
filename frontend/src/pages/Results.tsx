@@ -36,7 +36,7 @@ import { formatKRW, formatPercent, formatNumber } from '../utils/formatters';
 
 export const Results = () => {
   const { t } = useTranslation(['common', 'pages']);
-  const { data, loading, error } = usePrecomputed();
+  const { data, loading, error, isFallback } = usePrecomputed();
 
   if (loading) {
     return (
@@ -82,6 +82,20 @@ export const Results = () => {
 
   return (
     <Box>
+      {/* Fallback data notice */}
+      {isFallback && (
+        <Section>
+          <Alert status="info" borderRadius="0" bg="rgba(0, 150, 255, 0.1)" borderColor="blue.400" borderWidth="1px">
+            <AlertIcon />
+            <Text fontSize="sm" color="gray.300">
+              서버가 응답하지 않아 캐시된 결과를 표시합니다. 실시간 데이터는 잠시 후 새로고침하세요.
+              <br />
+              Showing cached results (server unavailable). Refresh later for live data.
+            </Text>
+          </Alert>
+        </Section>
+      )}
+
       {/* Winner Announcement - SpaceX Minimal Style */}
       <Section>
         <Card

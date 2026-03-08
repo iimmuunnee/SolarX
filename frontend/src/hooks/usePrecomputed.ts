@@ -1,14 +1,17 @@
 /**
  * Hook for fetching pre-computed results
+ * Falls back to static data when the API is unavailable
  */
 import { useState, useEffect } from 'react';
 import { fetchPrecomputedBenchmark } from '../services/api';
+import { fallbackBenchmarkData } from '../data/fallbackResults';
 import type { BenchmarkResponse } from '../types/simulation';
 
 export const usePrecomputed = () => {
   const [data, setData] = useState<BenchmarkResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isFallback, setIsFallback] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -17,7 +20,10 @@ export const usePrecomputed = () => {
         setData(response);
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load results');
+        // API failed — use fallback static data
+        setData(fallbackBenchmarkData);
+        setIsFallback(true);
+        setError(null);
       } finally {
         setLoading(false);
       }
@@ -26,5 +32,5 @@ export const usePrecomputed = () => {
     loadData();
   }, []);
 
-  return { data, loading, error };
+  return { data, loading, error, isFallback };
 };
