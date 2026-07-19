@@ -1,0 +1,2 @@
+# 초기 탐색용 노트북 아카이브는 언어 통계에서 제외 (핵심 코드는 src/·backend/)
+*.ipynb linguist-vendored
