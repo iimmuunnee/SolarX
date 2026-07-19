@@ -80,8 +80,8 @@
 
 - **증상**: 초기 시뮬레이션에서 주간 수익이 20억 원으로 산출됐다. 코드는 에러 없이 끝까지 돌았고, 그래프도 그럴듯했다 — 규모만 비상식적이었다.
 - **추적**: 수익 계산을 역산하며 발전량 데이터의 원천을 확인했다. 공공데이터의 발전량 컬럼이 `kW`가 아니라 `Wh` 단위로 기록되어 있어, 파이프라인 전체에서 값이 1,000배 증폭된 상태였다.
-- **해결**: 데이터 로더에 단위 변환을 명시적으로 두고(`Wh → kW`), 이후 모든 에너지 흐름을 kW(전력)·kWh(에너지)로 통일했다. 시간 간격도 암묵적 1시간 가정 대신 `dt_hours` 파라미터로 명시했다. → [`src/data_loader.py`](src/data_loader.py)
-- **검증**: 데이터 로더의 단위 변환과 검증 로직을 단위 테스트로 고정했다. → [`tests/unit/test_data_loader.py`](tests/unit/test_data_loader.py)
+- **해결**: 시뮬레이션 입력 단계에서 단위 변환(`Wh → kW`)을 명시적으로 적용하고, 이후 모든 에너지 흐름을 kW(전력)·kWh(에너지)로 통일했다. 시간 간격도 암묵적 1시간 가정 대신 `dt_hours` 파라미터로 명시했다. → [`main.py`](main.py) · [`simulation_service.py`](backend/app/services/simulation_service.py)
+- **검증**: 변환 이후의 에너지 흐름은 배터리 물리 테스트(에너지 보존·C-rate·SoC 제약)로 고정했다(→ [`tests/unit/test_battery.py`](tests/unit/test_battery.py)). 다만 단위 변환 지점 자체를 고정하는 회귀 테스트는 아직 없다 — 변환 로직이 두 곳(CLI·웹 백엔드)에 중복돼 있어, 공용 함수로 추출한 뒤 테스트를 붙이는 것을 개선 과제로 남겼다.
 - **교훈**: "결과가 이상하게 좋다"는 버그의 신호다. 외부 데이터는 단위 명세부터 의심해야 한다.
 
 ### Case 2: 잉여 전력이 조용히 버려지고 있었다 — Bypass Logic
@@ -105,8 +105,8 @@ pytest tests/ -v --cov=src        # 23 passed
 | 분류 | 파일 | 건수 | 검증 내용 |
 |:---|:---|:---|:---|
 | 단위 | `tests/unit/test_battery.py` | 8 | 충·방전 물리(C-rate·SoC·DoD 제약), 효율 적용, 과방전 방지 |
-| 단위 | `tests/unit/test_data_loader.py` | 5 | 단위 변환(Case 1 회귀), 데이터 검증, 시퀀스 생성 |
-| 단위 | `tests/unit/test_model.py` | 6 | LSTM 구조, 입출력 shape, 학습 설정 |
+| 단위 | `tests/unit/test_data_loader.py` | 5 | 시퀀스 생성·시계열 순서 보존, 스케일러 일관성, 기상 컬럼 정규화, 빈 데이터 처리 |
+| 단위 | `tests/unit/test_model.py` | 6 | LSTM forward·shape, 재현성, 배치 독립성, gradient flow |
 | 통합 | `tests/integration/test_simulation_pipeline.py` | 4 | End-to-end 시뮬레이션 파이프라인 |
 
 ### 지역별 시나리오 검증 (Robustness)
