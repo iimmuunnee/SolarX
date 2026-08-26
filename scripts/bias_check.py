@@ -100,6 +100,22 @@ def main() -> int:
     print(f"  가상 가격: {virt['samsung'][1]:+.2f}%   →   실측 SMP: {real['samsung'][1]:+.2f}%")
     print()
 
+    # 지역별 확장성(Part 2): 같은 설비(용량 2,280 kWh 고정)를 일사량이 다른
+    # 부지에 놓았을 때. region_factor만 바꿔 실측 SMP로 재실행하고, 대표값으로
+    # samsung(수익 1위) 누적 수익을 본다. 옛 표는 6,160만에 계수를 곱해 수익이
+    # 일사량에 선형 비례한다고 가정했으므로, 선형 기대와의 편차를 함께 출력한다.
+    print("[지역별 확장성] 용량 2,280 kWh 고정 · 실측 SMP · region_factor만 변경 · samsung 누적 수익")
+    donghae = None
+    for name, f in [("동해 (기준)", 1.0), ("제주 (고일사)", 1.3), ("시애틀 (저일사)", 0.6)]:
+        resp = svc.run_benchmark(BenchmarkRequest(region_factor=f))
+        ss = next(v.revenue_krw for v in resp.vendors if v.vendor_id == "samsung")
+        if f == 1.0:
+            donghae = ss
+        expect = donghae * f
+        dev = (ss - expect) / expect * 100.0 if expect else 0.0
+        print(f"  {name:14} x{f}:  {int(ss):>13,} 원   (선형 기대 {int(expect):>13,}, 편차 {dev:+.2f}%)")
+    print()
+
     # 검증: 실측 줄이 fallbackResults.ts와 일치하는가
     print("[검증] 실측 수익이 fallbackResults.ts 값과 일치하는지")
     ok = True
