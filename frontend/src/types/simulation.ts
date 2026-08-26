@@ -16,6 +16,10 @@ export interface TimeSeriesData {
   samsung_profit_krw?: number[];
   tesla_profit_krw?: number[];
   baseline_profit_krw: number[];
+  // Hourly SoC (%) of the representative vendor (Samsung) and the hourly SMP
+  // price. Optional: older cached/fallback responses predate these fields.
+  soc_percent?: number[];
+  smp_price_krw?: number[];
 }
 
 export interface SimulationMetadata {

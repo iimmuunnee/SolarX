@@ -142,11 +142,12 @@ class SimulationService:
         charge_threshold: float,
         discharge_threshold: float,
         allow_grid_charge: bool,
-    ) -> Tuple[float, List[float], float]:
+    ) -> Tuple[float, List[float], float, List[float]]:
         """Run simulation for a single battery.
 
         Returns:
-            Tuple of (total_profit, profit_history, avg_soc)
+            Tuple of (total_profit, profit_history, avg_soc, soc_history)
+            where soc_history is the hourly State of Charge in percent.
         """
         avg_price = np.mean(real_prices)
         profit = 0.0
@@ -183,7 +184,10 @@ class SimulationService:
             soc_history.append(battery.get_soc())
 
         avg_soc = float(np.mean(soc_history)) if soc_history else 0.5
-        return profit, history, avg_soc
+        # soc_history holds the raw SoC fraction (0-1) per hour; expose it as
+        # percent so the frontend can render the actual charge/discharge curve.
+        soc_history_pct = [s * 100.0 for s in soc_history]
+        return profit, history, avg_soc, soc_history_pct
 
     def _create_vendor_result(
         self,
@@ -264,9 +268,10 @@ class SimulationService:
         # Simulate each vendor
         vendor_results = []
         all_histories = {}
+        all_soc = {}
 
         for batt in batteries:
-            profit, history, avg_soc = self._simulate_battery(
+            profit, history, avg_soc, soc_history = self._simulate_battery(
                 battery=batt,
                 y_real_kw=y_real_scaled,
                 y_pred_kw=self.y_pred_kw * request.region_factor,
@@ -280,6 +285,7 @@ class SimulationService:
             vendor_result = self._create_vendor_result(batt, profit, avg_soc, battery_capacity_kwh, simulation_years)
             vendor_results.append(vendor_result)
             all_histories[vendor_result.vendor_id] = history
+            all_soc[vendor_result.vendor_id] = soc_history
 
         # Create time series data
         hours = list(range(len(y_real_scaled)))
@@ -291,6 +297,11 @@ class SimulationService:
             samsung_profit_krw=ensure_finite(all_histories.get("samsung", [])),
             tesla_profit_krw=ensure_finite(all_histories.get("tesla", [])),
             baseline_profit_krw=ensure_finite(baseline_history),
+            # Representative SoC curve = Samsung, the top earner in the benchmark
+            # (matches the winner shown in the portfolio). SMP is the shared
+            # price series driving every vendor's decisions.
+            soc_percent=ensure_finite(all_soc.get("samsung", [])),
+            smp_price_krw=ensure_finite(self.real_prices.tolist()),
         )
 
         # Create metadata
@@ -329,7 +340,7 @@ class SimulationService:
             baseline_history.append(base_profit)
 
         # Simulate
-        profit, history, avg_soc = self._simulate_battery(
+        profit, history, avg_soc, soc_history = self._simulate_battery(
             battery=battery,
             y_real_kw=y_real_scaled,
             y_pred_kw=self.y_pred_kw * request.region_factor,
@@ -349,6 +360,9 @@ class SimulationService:
             actual_generation_kw=ensure_finite(y_real_scaled.tolist()),
             predicted_generation_kw=ensure_finite((self.y_pred_kw * request.region_factor).tolist()),
             baseline_profit_krw=ensure_finite(baseline_history),
+            # SoC of the selected vendor + the shared SMP price series.
+            soc_percent=ensure_finite(soc_history),
+            smp_price_krw=ensure_finite(self.real_prices.tolist()),
         )
         # Add vendor-specific profit to appropriate field
         if request.vendor_id == "lg":

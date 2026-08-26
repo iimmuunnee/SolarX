@@ -21,6 +21,13 @@ class TimeSeriesData(BaseModel):
     samsung_profit_krw: List[float] = Field(default=None, description="Cumulative profit for Samsung battery in KRW")
     tesla_profit_krw: List[float] = Field(default=None, description="Cumulative profit for Tesla battery in KRW")
     baseline_profit_krw: List[float] = Field(..., description="Cumulative profit without ESS (baseline) in KRW")
+    # Hourly State-of-Charge (%) of the representative vendor (Samsung, the top
+    # earner) and the hourly SMP price used for decisions. Both are already
+    # computed during simulation; exposing them lets the frontend visualize the
+    # actual charge/discharge behavior. Optional for backward compatibility with
+    # older cached/fallback responses that predate these fields.
+    soc_percent: List[float] = Field(default=None, description="Hourly State of Charge (%) of the representative vendor")
+    smp_price_krw: List[float] = Field(default=None, description="Hourly SMP price in KRW/kWh used for charge/discharge decisions")
 
 
 class SimulationMetadata(BaseModel):
