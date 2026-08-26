@@ -108,7 +108,7 @@ export const ResultsEconomicTable = ({ vendors, baseline, winnerId }: ResultsEco
             {t('results.vendorComparison')}
           </Heading>
 
-          <MethodologyPanel capacityKwh={2740} vendors={vendors} />
+          <MethodologyPanel capacityKwh={2280} vendors={vendors} />
 
           <Box
             overflowX="auto"

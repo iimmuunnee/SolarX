@@ -21,18 +21,16 @@ interface MethodologyPanelProps {
   vendors: VendorResult[];
 }
 
-// BloombergNEF 2025 기준 단가 ($/kWh)
-const UNIT_COST_USD: Record<string, number> = {
-  lg: 142,
-  samsung: 148,
-  tesla: 135,
-};
+// 백엔드(economics.py)와 동일한 설치비·환율. CAPEX 값 자체는 백엔드가 계산한
+// v.capex_krw를 그대로 쓰고, 벤더별 단가($/kWh)만 이 상수로 역산해 표시한다.
 const INSTALL_FACTOR = 1.15;
 const USD_TO_KRW = 1320;
 
 function formatKrw(value: number): string {
   if (Math.abs(value) >= 1e8) {
-    return `₩${(value / 1e8).toFixed(1)}억`;
+    // 2자리로 표기해 아래 경제성 표의 전체 CAPEX(예: ₩622,987,200 = 6.23억)와
+    // 한눈에 같은 값임이 드러나게 한다.
+    return `₩${(value / 1e8).toFixed(2)}억`;
   }
   if (Math.abs(value) >= 1e4) {
     return `₩${(value / 1e4).toFixed(0)}만`;
@@ -115,7 +113,7 @@ export const MethodologyPanel = ({ capacityKwh, vendors }: MethodologyPanelProps
                 {`CAPEX = 용량(kWh) × 단가($/kWh) × ${INSTALL_FACTOR}(설치비) × ${USD_TO_KRW}(환율)`}
               </Code>
               <Text mt={2} fontSize="xs" color="gray.500">
-                출처: BloombergNEF 2025 Battery Price Survey
+                단가는 시뮬레이션의 벤더별 비용 가정(economics.py)에서 역산 · 설치비 15%·환율 1,320원 포함 · CAPEX 값은 아래 경제성 표와 동일
               </Text>
 
               {/* 실시간 계산 테이블 */}
@@ -127,8 +125,9 @@ export const MethodologyPanel = ({ capacityKwh, vendors }: MethodologyPanelProps
                   <Text fontWeight="bold" color="gray.400" fontSize="xs">CAPEX</Text>
                 </SimpleGrid>
                 {vendors.map((v) => {
-                  const unitCost = UNIT_COST_USD[v.vendor_id] ?? 140;
-                  const capexCalc = capacityKwh * unitCost * INSTALL_FACTOR * USD_TO_KRW;
+                  // 백엔드가 계산한 실제 CAPEX(v.capex_krw)를 그대로 표시해 아래
+                  // 경제성 표와 100% 일치시키고, 단가는 거기서 역산한다.
+                  const impliedUnitUsd = v.capex_krw / (capacityKwh * INSTALL_FACTOR * USD_TO_KRW);
                   return (
                     <SimpleGrid
                       key={v.vendor_id}
@@ -139,9 +138,9 @@ export const MethodologyPanel = ({ capacityKwh, vendors }: MethodologyPanelProps
                       borderColor="spacex.borderGray"
                     >
                       <Text fontSize="xs">{v.vendor_name}</Text>
-                      <Text fontSize="xs">${unitCost}</Text>
+                      <Text fontSize="xs">${impliedUnitUsd.toFixed(0)}</Text>
                       <Text fontSize="xs">{capacityKwh.toLocaleString()} kWh</Text>
-                      <Text fontSize="xs" color="cyan.300">{formatKrw(capexCalc)}</Text>
+                      <Text fontSize="xs" color="cyan.300">{formatKrw(v.capex_krw)}</Text>
                     </SimpleGrid>
                   );
                 })}
