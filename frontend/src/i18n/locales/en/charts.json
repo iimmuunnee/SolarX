@@ -1,8 +1,8 @@
 {
   "profitChart": {
-    "title": "Cumulative Profit Over Time",
+    "title": "Additional Profit vs. Baseline",
     "xAxis": "Day",
-    "yAxis": "Profit (KRW)",
+    "yAxis": "Additional Profit (KRW)",
     "tooltip": {
       "hour": "Day {{day}}"
     }

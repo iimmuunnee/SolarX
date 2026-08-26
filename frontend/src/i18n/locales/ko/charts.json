@@ -1,8 +1,8 @@
 {
   "profitChart": {
-    "title": "시간에 따른 누적 수익",
+    "title": "기준선 대비 추가 수익",
     "xAxis": "일 (day)",
-    "yAxis": "수익 (원)",
+    "yAxis": "추가 수익 (원)",
     "tooltip": {
       "hour": "{{day}}일차"
     }

@@ -78,13 +78,22 @@ export const ProfitChart = ({ data, title, height = 400 }: ProfitChartProps) => 
     .filter((v) => v.data && v.data.length > 0)
     .sort((a, b) => b.finalProfit - a.finalProfit);
 
-  // Transform data for Recharts
+  // Transform data for Recharts.
+  // 절대 누적액이 아니라 "기준선(ESS 없음) 대비 추가 수익"을 그린다.
+  // 세 제조사의 최종 누적액은 서로 8% 안쪽으로 붙어 있어서, 0부터 6천만원까지
+  // 그린 축 위에서는 선이 겹쳐 보인다. 차이를 그리면 기준선이 0이 되고
+  // 제조사별 격차(수백만원 단위)가 축 전체를 쓰게 되어 비교가 가능해진다.
+  const delta = (series: number[] | undefined, index: number): number | null => {
+    const v = series?.[index];
+    return v == null ? null : v - data.baseline_profit_krw[index];
+  };
+
   const chartData = data.hours.map((hour, index) => ({
     hour,
-    lg: data.lg_profit_krw?.[index] || null,
-    samsung: data.samsung_profit_krw?.[index] || null,
-    tesla: data.tesla_profit_krw?.[index] || null,
-    baseline: data.baseline_profit_krw[index],
+    lg: delta(data.lg_profit_krw, index),
+    samsung: delta(data.samsung_profit_krw, index),
+    tesla: delta(data.tesla_profit_krw, index),
+    baseline: 0,
   }));
 
   // Sample data for better performance (show every 10th point if > 500 points)
@@ -92,20 +101,18 @@ export const ProfitChart = ({ data, title, height = 400 }: ProfitChartProps) => 
     ? chartData.filter((_, index) => index % 10 === 0)
     : chartData;
 
-  // Calculate Y-axis domain for better zoom
-  const allProfits = [
-    ...(data.baseline_profit_krw || []),
-    ...(data.lg_profit_krw || []),
-    ...(data.samsung_profit_krw || []),
-    ...(data.tesla_profit_krw || []),
-  ].filter((v) => v !== null && v !== undefined && v !== 0);
+  // Y축 범위: 기준선 대비 차이값 기준으로 계산한다.
+  // 기준선은 항상 0이므로 하한은 0을 포함하고, 상한만 여유를 준다.
+  const allDeltas = sampledData
+    .flatMap((d) => [d.lg, d.samsung, d.tesla])
+    .filter((v): v is number => v != null);
 
-  const minProfit = Math.min(...allProfits);
-  const maxProfit = Math.max(...allProfits);
+  const maxDelta = allDeltas.length > 0 ? Math.max(...allDeltas) : 0;
+  const minDelta = allDeltas.length > 0 ? Math.min(...allDeltas) : 0;
 
   const yAxisDomain = [
-    Math.floor(minProfit * 0.9),
-    Math.ceil(maxProfit * 1.05),
+    Math.min(0, Math.floor(minDelta * 1.05)),
+    Math.ceil(maxDelta * 1.1),
   ];
 
   // Left offset used to horizontally align axis labels with the chart area
