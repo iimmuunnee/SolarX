@@ -1,5 +1,12 @@
 /**
  * SolarChargingAnimation - GSAP 3-phase loop: charging → converting → selling
+ *
+ * This is a deliberately ABSTRACT illustration, not a data readout. It shows the
+ * *concept* — light in, battery fills, energy converts to money, sells to grid —
+ * and intentionally displays NO numeric SoC value: the real simulated SoC averages
+ * ~23%, so printing a rising "80%" would be a false value claim. Only the gauge
+ * filling and draining is shown. (Real per-hour SoC/SMP series are exposed on the
+ * API for a future data-driven version; see soc_percent/smp_price_krw.)
  */
 import { useEffect, useRef } from 'react';
 import { Box } from '@chakra-ui/react';
@@ -19,10 +26,20 @@ const FILL_MAX_H   = BAT_H - 4;              // 136
 const FILL_80_H    = FILL_MAX_H * 0.8;       // 108.8
 const FILL_80_Y    = FILL_BOTTOM - FILL_80_H; // ~301
 
-const PARTICLE_Y_START = SUN_CY + 34; // 124 — just below sun edge
+const PARTICLE_Y_START = SUN_CY + 34; // 124 — just below the light source
 const PARTICLE_Y_END   = BAT_Y - 2;  // 270 — just above battery top
 
-const SUN_RAYS = Array.from({ length: 8 }, (_, i) => i);
+// Particle stream: 10 emitters with per-index variation in horizontal spread,
+// radius, speed and start delay so the flow reads as a continuous shimmer rather
+// than three lockstep dots. Values are index-derived (deterministic, no random)
+// so they stay stable across renders and are easy to reason about.
+const PARTICLE_COUNT = 10;
+const PARTICLES = Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
+  startX: SUN_CX + (i - (PARTICLE_COUNT - 1) / 2) * 7, // fan out under the light
+  r: 3 + (i % 3),                                      // 3–5 px
+  dur: 0.75 + (i % 4) * 0.13,                          // 0.75–1.14 s
+  delay: (i % 5) * 0.34,                               // staggered starts
+}));
 
 const getBatteryFillColor = (socPct: number) => {
   if (socPct <= 10) return '#EF4444'; // red
@@ -35,17 +52,15 @@ export const SolarChargingAnimation = () => {
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const glowRef    = useRef<SVGCircleElement>(null);
-  const p0Ref      = useRef<SVGCircleElement>(null);
-  const p1Ref      = useRef<SVGCircleElement>(null);
-  const p2Ref      = useRef<SVGCircleElement>(null);
+  const glowRef     = useRef<SVGCircleElement>(null);
+  const particleRefs = useRef<(SVGCircleElement | null)[]>([]);
   const battFillRef = useRef<SVGRectElement>(null);
-  const battPctRef  = useRef<SVGTextElement>(null);
   const badgeRef    = useRef<SVGGElement>(null);
   const gridRef     = useRef<SVGGElement>(null);
 
   useEffect(() => {
     if (prefersReducedMotion) {
+      // Static, meaningful frame: a half-filled gauge and a steady light source.
       if (battFillRef.current) {
         gsap.set(battFillRef.current, {
           attr: {
@@ -55,19 +70,18 @@ export const SolarChargingAnimation = () => {
           },
         });
       }
-      if (battPctRef.current) battPctRef.current.textContent = '50%';
+      if (glowRef.current) gsap.set(glowRef.current, { opacity: 0.55 });
       return;
     }
 
-    const particles = [p0Ref.current, p1Ref.current, p2Ref.current];
+    const particles = particleRefs.current;
 
     // ── Initial states ──
-    gsap.set(glowRef.current, { opacity: 0 });
-    gsap.set(particles, { opacity: 0, attr: { cy: PARTICLE_Y_START } });
+    gsap.set(glowRef.current, { opacity: 0.35, svgOrigin: `${SUN_CX} ${SUN_CY}` });
+    gsap.set(particles, { opacity: 0 });
     gsap.set(battFillRef.current, { attr: { height: 0, y: FILL_BOTTOM, fill: getBatteryFillColor(0) } });
     gsap.set(badgeRef.current, { opacity: 0, x: 0, y: 0, scale: 1 });
     gsap.set(gridRef.current, { scale: 1, svgOrigin: '322 215' });
-    if (battPctRef.current) battPctRef.current.textContent = '0%';
 
     const chargeProxy    = { value: 0 };
     const dischargeProxy = { value: 80 };
@@ -76,34 +90,24 @@ export const SolarChargingAnimation = () => {
 
     // ── Stage 1: CHARGING (0–4s) ──
 
-    tl.fromTo(glowRef.current,
-      { opacity: 0 },
-      { opacity: 0.4, duration: 1, ease: 'sine.inOut', yoyo: true, repeat: 3 },
+    // Light source breathes as it "gathers" energy.
+    tl.to(glowRef.current,
+      { opacity: 0.75, scale: 1.08, duration: 1, ease: 'sine.inOut', yoyo: true, repeat: 3 },
       0,
     );
 
-    const MOVE_DUR    = 0.9;
-    const FADE_DUR    = 0.25;
-    const STAGGER     = 0.4;
-    const PASS2_START = 1.9;
-
+    // Particle stream — each emitter runs two passes to cover the 4s window,
+    // converging from its fanned-out start x toward the battery center.
     particles.forEach((p, i) => {
-      const s1 = i * STAGGER;
-      const s2 = PASS2_START + i * STAGGER;
-
-      tl.fromTo(p,
-        { opacity: 0, attr: { cy: PARTICLE_Y_START } },
-        { opacity: 0.9, attr: { cy: PARTICLE_Y_END }, duration: MOVE_DUR, ease: 'power1.in' },
-        s1,
-      );
-      tl.to(p, { opacity: 0, duration: FADE_DUR }, s1 + MOVE_DUR);
-
-      tl.fromTo(p,
-        { opacity: 0, attr: { cy: PARTICLE_Y_START } },
-        { opacity: 0.9, attr: { cy: PARTICLE_Y_END }, duration: MOVE_DUR, ease: 'power1.in' },
-        s2,
-      );
-      tl.to(p, { opacity: 0, duration: FADE_DUR }, s2 + MOVE_DUR);
+      const cfg = PARTICLES[i];
+      [cfg.delay, cfg.delay + 2.0].forEach((startT) => {
+        tl.fromTo(p,
+          { opacity: 0, attr: { cx: cfg.startX, cy: PARTICLE_Y_START } },
+          { opacity: 0.85, attr: { cx: SUN_CX, cy: PARTICLE_Y_END }, duration: cfg.dur, ease: 'power1.in' },
+          startT,
+        );
+        tl.to(p, { opacity: 0, duration: 0.22 }, startT + cfg.dur);
+      });
     });
 
     tl.fromTo(battFillRef.current,
@@ -112,13 +116,14 @@ export const SolarChargingAnimation = () => {
       0,
     );
 
+    // Drive only the fill COLOR from the level (red→yellow→green). No number is
+    // shown — the color is a qualitative cue, not a value claim.
     tl.fromTo(chargeProxy,
       { value: 0 },
       {
         value: 80, duration: 4, ease: 'power1.inOut',
         onUpdate: () => {
           const soc = Math.round(chargeProxy.value);
-          if (battPctRef.current) battPctRef.current.textContent = `${soc}%`;
           if (battFillRef.current) gsap.set(battFillRef.current, { attr: { fill: getBatteryFillColor(soc) } });
         },
       },
@@ -161,7 +166,6 @@ export const SolarChargingAnimation = () => {
         value: 0, duration: 2, ease: 'power1.inOut',
         onUpdate: () => {
           const soc = Math.round(dischargeProxy.value);
-          if (battPctRef.current) battPctRef.current.textContent = `${soc}%`;
           if (battFillRef.current) gsap.set(battFillRef.current, { attr: { fill: getBatteryFillColor(soc) } });
         },
       },
@@ -194,13 +198,13 @@ export const SolarChargingAnimation = () => {
     >
       <svg width="340" height="500" viewBox="0 0 340 500">
         <defs>
-          <filter id="sunGlowX">
-            <feGaussianBlur stdDeviation="5" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
+          {/* Soft radial light source — replaces the old clip-art sun */}
+          <radialGradient id="lightGradX" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#FFF4CC" stopOpacity="0.95" />
+            <stop offset="35%" stopColor="#FFD24D" stopOpacity="0.75" />
+            <stop offset="70%" stopColor="#FFB020" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#FFB020" stopOpacity="0" />
+          </radialGradient>
           <linearGradient id="gridBoltGradX" x1="308" y1="199" x2="334" y2="229" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#93c5fd" />
             <stop offset="100%" stopColor="#38bdf8" />
@@ -211,43 +215,33 @@ export const SolarChargingAnimation = () => {
           </linearGradient>
         </defs>
 
-        {/* Glow ring */}
+        {/* Radial-gradient light source (animated opacity/scale via glowRef) */}
         <circle
           ref={glowRef}
-          cx={SUN_CX} cy={SUN_CY} r="48"
-          fill="none" stroke="#FFD700" strokeWidth="2.5"
-          opacity={0}
+          cx={SUN_CX} cy={SUN_CY} r="58"
+          fill="url(#lightGradX)"
+          opacity={0.35}
         />
-
-        {/* Sun rays (static) */}
-        {SUN_RAYS.map((i) => {
-          const angle = (i * 45 * Math.PI) / 180;
-          const x1 = SUN_CX + 30 * Math.cos(angle);
-          const y1 = SUN_CY + 30 * Math.sin(angle);
-          const x2 = SUN_CX + 46 * Math.cos(angle);
-          const y2 = SUN_CY + 46 * Math.sin(angle);
-          return (
-            <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
-              stroke="#FFD700" strokeWidth="2.5" strokeLinecap="round" opacity={0.8} />
-          );
-        })}
-
-        {/* Sun core */}
-        <circle cx={SUN_CX} cy={SUN_CY} r="24" fill="#FFD700" filter="url(#sunGlowX)" />
-        <circle cx={SUN_CX} cy={SUN_CY} r="16" fill="#FFA500" />
+        {/* Bright core of the light */}
+        <circle cx={SUN_CX} cy={SUN_CY} r="10" fill="#FFF4CC" opacity={0.9} />
 
         {/* Energy path guide */}
         <line
           x1={SUN_CX} y1={PARTICLE_Y_START}
           x2={SUN_CX} y2={PARTICLE_Y_END}
           stroke="#FFD700" strokeWidth="1.5"
-          strokeDasharray="5 5" opacity={0.2}
+          strokeDasharray="5 5" opacity={0.15}
         />
 
-        {/* Energy particles */}
-        <circle ref={p0Ref} cx={SUN_CX} cy={PARTICLE_Y_START} r="6" fill="#FFD700" opacity={0} />
-        <circle ref={p1Ref} cx={SUN_CX} cy={PARTICLE_Y_START} r="6" fill="#FFD700" opacity={0} />
-        <circle ref={p2Ref} cx={SUN_CX} cy={PARTICLE_Y_START} r="6" fill="#FFD700" opacity={0} />
+        {/* Energy particles (10, index-varied) */}
+        {PARTICLES.map((cfg, i) => (
+          <circle
+            key={i}
+            ref={(el) => { particleRefs.current[i] = el; }}
+            cx={cfg.startX} cy={PARTICLE_Y_START} r={cfg.r}
+            fill="#FFD700" opacity={0}
+          />
+        ))}
 
         {/* Battery terminal nub */}
         <rect x={BAT_X + 28} y={BAT_Y - 10} width="44" height="10" rx="1"
@@ -257,7 +251,7 @@ export const SolarChargingAnimation = () => {
         <rect x={BAT_X} y={BAT_Y} width={BAT_W} height={BAT_H}
           rx="2" fill="#111827" stroke="white" strokeWidth="2" />
 
-        {/* Level guides at 25 / 50 / 75 % */}
+        {/* Level graduation lines (unlabeled gauge ticks) */}
         {[25, 50, 75].map((pct) => (
           <line key={pct}
             x1={BAT_X}       y1={BAT_Y + BAT_H * (1 - pct / 100)}
@@ -271,7 +265,7 @@ export const SolarChargingAnimation = () => {
           <rect x={FILL_X} y={BAT_Y + 2} width={FILL_W} height={FILL_MAX_H} />
         </clipPath>
 
-        {/* Battery fill rect */}
+        {/* Battery fill rect (gauge only — no numeric label) */}
         <rect
           ref={battFillRef}
           x={FILL_X}
@@ -283,18 +277,6 @@ export const SolarChargingAnimation = () => {
           clipPath="url(#battClipX)"
         />
 
-        {/* SOC percentage text */}
-        <text
-          ref={battPctRef}
-          x={SUN_CX} y={BAT_Y + BAT_H / 2 + 1}
-          textAnchor="middle" dominantBaseline="middle"
-          fill="white" fontSize="20" fontWeight="bold"
-          fontFamily="monospace"
-          style={{ mixBlendMode: 'difference' as const }}
-        >
-          0%
-        </text>
-
         {/* ₩ Conversion Badge */}
         <g ref={badgeRef} opacity={0}>
           <circle cx={SUN_CX} cy="210" r="22" fill="#facc15" stroke="#a16207" strokeWidth="2" />
@@ -305,7 +287,7 @@ export const SolarChargingAnimation = () => {
             fill="#7c2d12" fontSize="20" fontWeight="900"
             fontFamily="monospace"
           >
-            {'\u20A9'}
+            {'₩'}
           </text>
         </g>
 
