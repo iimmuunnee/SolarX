@@ -104,10 +104,20 @@ export const Landing = () => {
           py={{ base: 8, md: 10 }}
         >
           <SimpleGrid columns={{ base: 1, md: 3 }} spacing={16}>
+            {/*
+              히어로 지표는 저장소 코드로 재현되는 값만 쓴다.
+              - 이전 값 284%는 어떤 계산으로도 뒷받침되지 않는 하드코딩 리터럴이었다.
+              - +3.79%: 실측 KPX SMP 기준 Samsung SDI(최종 수익 1위)의 기준선(ESS
+                없음) 대비 누적 수익 개선율. 결과 페이지 AI Insights의
+                "+₩2,156,275 over baseline"과 같은 수치이며, `scripts/bias_check.py`로
+                재현된다(2,592h 테스트셋·용량 2,280kWh·grid_charge=True).
+                (한때 README에 있던 +8.31%는 저장소 코드로 재현되지 않아 폐기했다.)
+              - 99.3%: 3사 평균 SOH(99.34~99.41%).
+            */}
             {[
               { value: '3', label: t('pages:landing.hero.metrics.vendors') },
               { value: '99.3%', label: t('pages:landing.hero.metrics.soh') },
-              { value: '284%', label: t('pages:landing.hero.metrics.roi') },
+              { value: '+3.79%', label: t('pages:landing.hero.metrics.improvement') },
             ].map((metric, index) => (
               <VStack key={index} spacing={3} align="center">
                 <Heading size="3xl" color="solar.gold" fontWeight="800">

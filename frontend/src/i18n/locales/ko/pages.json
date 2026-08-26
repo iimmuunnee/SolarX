@@ -6,7 +6,7 @@
       "metrics": {
         "vendors": "비교 벤더",
         "soh": "배터리 건강도",
-        "roi": "투자 수익률"
+        "improvement": "기준선 대비 수익 개선"
       },
       "titleLine1": "SolarX: AI 기반",
       "titleLine2": "배터리 최적화"
@@ -57,7 +57,8 @@
   "results": {
     "loading": "사전 계산된 벤치마크 결과를 로드하는 중...",
     "winner": {
-      "badge": "OPTIMAL BATTERY",
+      "badge": "종합 점수 1위",
+      "basis": "가중 종합 점수 기준 · 수익 30 · ROI 25 · SOH 20 · 회수 15 · NPV 10 · 단일 지표(수익·ROI) 1위는 Samsung SDI",
       "totalRevenue": "총 수익",
       "stateOfHealth": "배터리 건강도",
       "roi": "투자 수익률",

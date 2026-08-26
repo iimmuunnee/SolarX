@@ -70,8 +70,19 @@ export const ResultsWinnerHero = ({ winner, baseline }: ResultsWinnerHeroProps) 
             fontWeight="bold"
             letterSpacing="widest"
           >
-            OPTIMAL BATTERY
+            {t('results.winner.badge', { defaultValue: 'TOP COMPOSITE SCORE' })}
           </MotionBadge>
+
+          {/* Basis of the ranking. The "winner" is the weighted-composite-score
+              leader, which can differ from the single-metric (revenue/ROI)
+              leader — spell that out so the demo doesn't contradict the
+              portfolio's revenue-based Samsung ranking. */}
+          <Text fontSize="xs" color="spacex.textGray" letterSpacing="wide" mt={-4} maxW="xl">
+            {t('results.winner.basis', {
+              defaultValue:
+                'Weighted composite · Rev 30 · ROI 25 · SOH 20 · Payback 15 · NPV 10 · single-metric (revenue/ROI) leader is Samsung SDI',
+            })}
+          </Text>
 
           {/* Vendor Name - blur to sharp */}
           <MotionText

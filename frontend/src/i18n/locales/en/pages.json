@@ -6,7 +6,7 @@
       "metrics": {
         "vendors": "Vendors Compared",
         "soh": "Battery SOH",
-        "roi": "ROI"
+        "improvement": "Profit vs. Baseline"
       },
       "titleLine1": "SolarX: AI Powered",
       "titleLine2": "Battery Optimization"
@@ -57,7 +57,8 @@
   "results": {
     "loading": "Loading pre-computed benchmark results...",
     "winner": {
-      "badge": "OPTIMAL BATTERY",
+      "badge": "TOP COMPOSITE SCORE",
+      "basis": "Weighted composite · Rev 30 · ROI 25 · SOH 20 · Payback 15 · NPV 10 · single-metric (revenue/ROI) leader is Samsung SDI",
       "totalRevenue": "Total Revenue",
       "stateOfHealth": "State of Health",
       "roi": "ROI",

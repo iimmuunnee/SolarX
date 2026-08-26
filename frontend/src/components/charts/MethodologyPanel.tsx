@@ -193,6 +193,41 @@ NPV = -CAPEX + Σ (연간수익 - O&M) / 1.05^t  [t=1..10]`}
               </HStack>
             </Box>
 
+            <Divider borderColor="spacex.borderGray" />
+
+            {/* 4. 종합 점수 가중치 — OPTIMAL 배지의 기준.
+                가중치 값은 utils/scoring.ts의 WEIGHTS와 일치해야 한다(표시용 복제). */}
+            <Box>
+              <Text fontWeight="bold" color="white" mb={2}>
+                4. 종합 점수(Composite Score) 가중치
+              </Text>
+              <Text fontSize="xs" color="gray.400" mb={3}>
+                상단 배지는 아래 5개 지표를 0~100으로 정규화한 뒤 가중 합산한 <Text as="span" color="gray.200">종합 점수 1위</Text>입니다.
+                이는 단일 지표(수익·ROI) 1위인 <Text as="span" color="gray.200">Samsung SDI</Text>와 다를 수 있습니다 —
+                LG는 SOH에서 앞서 종합 1위가 됩니다. 기준이 다른 것이지 어느 한쪽이 틀린 값은 아닙니다.
+              </Text>
+              <Box border="1px solid" borderColor="spacex.borderGray" borderRadius="sm" overflow="hidden">
+                {[
+                  ['수익 (Revenue)', '30%'],
+                  ['ROI', '25%'],
+                  ['SOH (건강도)', '20%'],
+                  ['회수기간 (Payback)', '15%'],
+                  ['NPV', '10%'],
+                ].map(([label, weight], i) => (
+                  <SimpleGrid
+                    key={label}
+                    columns={2}
+                    px={3}
+                    py={2}
+                    bg={i % 2 === 0 ? 'blackAlpha.400' : 'transparent'}
+                  >
+                    <Text fontSize="xs">{label}</Text>
+                    <Text fontSize="xs" color="cyan.300" textAlign="right">{weight}</Text>
+                  </SimpleGrid>
+                ))}
+              </Box>
+            </Box>
+
           </VStack>
         </Box>
       </Collapse>
